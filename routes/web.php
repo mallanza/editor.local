@@ -6,12 +6,10 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\MceDocumentController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
 Route::get('/dashboard', function () {
     return view('dashboard');
+
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -21,15 +19,7 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Route::get('qedit', function () {
-    return view('qedit');
-});
-
-Route::get('/editor', [DocumentController::class, 'index'])->name('documents.load');
-Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
-Route::post('/documents/update', [DocumentController::class, 'update'])->name('documents.update');
-
-
+Route::get('/', [MceDocumentController::class, 'index'])->name('mce.editor');
     Route::get('mce-editor', [MceDocumentController::class, 'index'])->name('mce.editor');
     Route::post('mce-store', [MceDocumentController::class, 'store'])->name('mce.store');
     Route::get('mce-load/{document}', [MceDocumentController::class, 'load'])->name('mce.load');

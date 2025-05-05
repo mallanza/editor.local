@@ -66,7 +66,8 @@
         <option data-userid="33" data-username="Jerri Blank">Jerri</option>
     </select>
 
-    <textarea id="editor" style="height:500px;">{!! $document->html ?? '' !!}</textarea>
+    <textarea id="editor" style="height:500px;">{!! $document->html ?? '' !!}
+    </textarea>
 
     <script>
         tinymce.init({
