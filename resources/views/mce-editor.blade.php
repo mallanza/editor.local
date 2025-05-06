@@ -16,6 +16,7 @@
     }
   </style>
 
+
   <!-- jQuery & ICE core JS -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://code.jquery.com/jquery-migrate-3.4.0.min.js"></script>
@@ -31,6 +32,8 @@
     })(window.jQuery);
   </script>
   <script src="{{ asset('js/ice/ice.js') }}"></script>
+
+
 </head>
 <body>
   <!-- User selector for ICE change-tracking -->
@@ -46,30 +49,47 @@
   <!-- TinyMCE & ICE plugin -->
   <script src="/js/tinymce/tinymce.min.js"></script>
   <script src="{{ asset('js/ice/plugin.js') }}"></script>
+  <script src="{{ asset('js/tinyai/tinyai-nolicense-v5.js') }}"></script>
 
   <script>
+ function myAiRequestFunction(request, respond) {
+    // e.g. do an AJAX/fetch to your AI endpoint…
+    fetch('/api/ai', {
+      method: 'POST',
+      body: JSON.stringify({ prompt: request.prompt }),
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(data => respond(data));
+  }
+
+
     tinymce.init({
       selector: '#editor',
       license_key: 'gpl',
       branding: false,
       promotion: false,
+      // AI plugin settings remain the same
+    ai_request: myAiRequestFunction,
+    ai_shortcuts: true,
+    contextmenu: 'advtemplate',
       plugins: [
         'ice', 'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
         'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
         'fullscreen', 'insertdatetime', 'media', 'table', 'help',
-        'wordcount', 'tinycomments'
+        'wordcount', 'tinycomments', 'myai', 'tableofcontents', 'advtemplate',
       ],
       toolbar1: [
         'styleselect', 'bold', 'italic', 'underline',
         '|', 'bullist', 'numlist', 'outdent', 'indent',
         '|', 'alignleft', 'aligncenter', 'alignright', 'alignjustify',
         '|', 'image', 'table',
-        '|', 'addcomment', 'showcomments',
-        '|', 'undo', 'redo'
+        '|', 'addcomment', 'showcomments' ,
+        '|', 'undo', 'redo', 'tableofcontents', 'addtemplate', 'inserttemplate',
       ].join(' '),
       toolbar2: [
         'ice_toggle_changes', 'ice_accept', 'ice_reject',
-        'ice_accept_all', 'ice_reject_all'
+        'ice_accept_all', 'ice_reject_all', 'aidialog', 'aishortcuts',
       ].join(' '),
       automatic_uploads: true,
       images_upload_url: '/image/upload',

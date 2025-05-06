@@ -33,6 +33,10 @@ Route::get('/', [MceDocumentController::class, 'index'])->name('mce.editor');
     })->name('images.upload');
 
 
+    Route::get('/track', function () {
+        return view('track');
+    });
+
 
 
 require __DIR__.'/auth.php';
