@@ -77,7 +77,7 @@
         'ice', 'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
         'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
         'fullscreen', 'insertdatetime', 'media', 'table', 'help',
-        'wordcount', 'tinycomments', 'myai', 'tableofcontents', 'advtemplate',
+        'wordcount', 'tinycomments', 'myai', 'tableofcontents', 'advtemplate', 'glossary',
       ],
       toolbar1: [
         'styleselect', 'bold', 'italic', 'underline',
@@ -85,7 +85,7 @@
         '|', 'alignleft', 'aligncenter', 'alignright', 'alignjustify',
         '|', 'image', 'table',
         '|', 'addcomment', 'showcomments' ,
-        '|', 'undo', 'redo', 'tableofcontents', 'addtemplate', 'inserttemplate',
+        '|', 'undo', 'redo', 'tableofcontents', 'addtemplate', 'inserttemplate', 'advtemplate', 'glossary',
       ].join(' '),
       toolbar2: [
         'ice_toggle_changes', 'ice_accept', 'ice_reject',
