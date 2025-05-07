@@ -87,6 +87,14 @@ tinymce.PluginManager.add('ice', function(editor) {
         span.title = `${act} by ${user}${when ? ' — ' + when : ''}`;
       });
 
+
+
+      editor.ui.registry.addButton('ice_enable_track_changes', {
+        text: 'Enable Track Changes',
+        onAction: () => iceEditor.rejectAll()
+      });
+
+
       // 7) Register the Show/Hide toggle
       editor.ui.registry.addToggleButton('ice_toggle_changes', {
         text: 'Show Changes',
@@ -126,5 +134,6 @@ tinymce.PluginManager.add('ice', function(editor) {
         text: 'Reject All',
         onAction: () => iceEditor.rejectAll()
       });
+
     });
   });

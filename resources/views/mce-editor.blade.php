@@ -90,7 +90,7 @@
         '|', 'undo', 'redo', 'tableofcontents', 'addtemplate', 'inserttemplate', 'advtemplate', 'glossary',
       ].join(' '),
       toolbar2: [
-        'ice_toggle_changes', 'ice_accept', 'ice_reject',
+        'ice_enable_track_changes', 'ice_toggle_changes', 'ice_accept', 'ice_reject',
         'ice_accept_all', 'ice_reject_all', 'aidialog', 'aishortcuts',
       ].join(' '),
       automatic_uploads: true,
