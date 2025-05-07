@@ -66,6 +66,8 @@
 
     tinymce.init({
       selector: '#editor',
+
+
       license_key: 'gpl',
       branding: false,
       promotion: false,
