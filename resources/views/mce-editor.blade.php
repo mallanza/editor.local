@@ -98,7 +98,7 @@
                 'wordcount', 'tinycomments', 'myai', 'tableofcontents', 'template', 'glossary', 'autosave',
                 'save'
             ],
-            toolbar1: "save undo redo |fontfamily blocks  fontsize bold italic underline strikethrough | forecolor backcolor | align outdent indent bullist numlist | formatpainter removeformat charmap | link image table | addcomment showcomments | addtemplate inserttemplate template glossary fullscreen",
+            toolbar1: "save undo redo | copy paste pastetext | fontfamily blocks  fontsize bold italic underline strikethrough | forecolor backcolor | align outdent indent bullist numlist | formatpainter removeformat charmap | link image table | addcomment showcomments | addtemplate inserttemplate template glossary fullscreen",
             toolbar2: "ice_enable_track_changes ice_toggle_changes ice_accept ice_reject ice_accept_all ice_reject_all | aidialog aishortcuts",
 
             automatic_uploads: true,
