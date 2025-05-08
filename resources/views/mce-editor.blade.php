@@ -74,25 +74,16 @@
       // AI plugin settings remain the same
     ai_request: myAiRequestFunction,
     ai_shortcuts: true,
-    contextmenu: 'advtemplate',
+    contextmenu: 'template',
       plugins: [
         'ice', 'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
         'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
         'fullscreen', 'insertdatetime', 'media', 'table', 'help',
-        'wordcount', 'tinycomments', 'myai', 'tableofcontents', 'advtemplate', 'glossary',
+        'wordcount', 'tinycomments', 'myai', 'tableofcontents', 'template', 'glossary', 'autosave', 'save'
       ],
-      toolbar1: [
-        'styleselect', 'bold', 'italic', 'underline',
-        '|', 'bullist', 'numlist', 'outdent', 'indent',
-        '|', 'alignleft', 'aligncenter', 'alignright', 'alignjustify',
-        '|', 'image', 'table',
-        '|', 'addcomment', 'showcomments' ,
-        '|', 'undo', 'redo', 'tableofcontents', 'addtemplate', 'inserttemplate', 'advtemplate', 'glossary',
-      ].join(' '),
-      toolbar2: [
-        'ice_enable_track_changes', 'ice_toggle_changes', 'ice_accept', 'ice_reject',
-        'ice_accept_all', 'ice_reject_all', 'aidialog', 'aishortcuts',
-      ].join(' '),
+      toolbar1: "save undo redo |fontfamily blocks  fontsize bold italic underline strikethrough | forecolor backcolor | align outdent indent bullist numlist | formatpainter removeformat charmap | link image table | addcomment showcomments | addtemplate inserttemplate template glossary fullscreen",
+      toolbar2: "ice_enable_track_changes ice_toggle_changes ice_accept ice_reject ice_accept_all ice_reject_all aidialog aishortcuts",
+
       automatic_uploads: true,
       images_upload_url: '/image/upload',
       file_picker_types: 'image',
