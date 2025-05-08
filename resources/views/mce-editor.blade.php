@@ -38,8 +38,15 @@
 </head>
 
 <body>
+
+    <p>Welcome, {{ Auth::user()->first_name ?? 'Guest' }} {{ Auth::user()->last_name ?? '' }}!</p>
+
+
     <!-- User selector for ICE change-tracking -->
     <select id="userSelect">
+        <option data-userid="{{ Auth::user()->id ?? '0' }}"
+            data-username="{{ Auth::user()->first_name ?? 'Guest' }} {{ Auth::user()->last_name ?? '' }}">
+            {{ Auth::user()->first_name ?? 'Guest' }} {{ Auth::user()->last_name ?? 'Guest' }}</option>
         <option data-userid="11" data-username="Geoffrey Jellineck">Geoffrey</option>
         <option data-userid="22" data-username="Chuck Noblet">Chuck</option>
         <option data-userid="33" data-username="Jerri Blank">Jerri</option>
@@ -91,14 +98,15 @@
             ai_request: myAiRequestFunction,
             ai_shortcuts: true,
             contextmenu: 'template',
+            paste_data_images: true,
             plugins: [
                 'ice', 'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
                 'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
                 'fullscreen', 'insertdatetime', 'media', 'table',
                 'wordcount', 'tinycomments', 'myai', 'tableofcontents', 'template', 'glossary', 'autosave',
-                'save'
+                'save', 'paste',
             ],
-            toolbar1: "save undo redo | copy paste pastetext | fontfamily blocks  fontsize bold italic underline strikethrough | forecolor backcolor | align outdent indent bullist numlist | formatpainter removeformat charmap | link image table | addcomment showcomments | addtemplate inserttemplate template glossary fullscreen",
+            toolbar1: "save undo redo | cut copy asyncPaste asyncPasteText | fontfamily blocks  fontsize bold italic underline strikethrough | forecolor backcolor | align outdent indent bullist numlist | formatpainter removeformat charmap | link image table | addcomment showcomments | addtemplate inserttemplate template glossary fullscreen",
             toolbar2: "ice_enable_track_changes ice_toggle_changes ice_accept ice_reject ice_accept_all ice_reject_all | aidialog aishortcuts",
 
             automatic_uploads: true,
@@ -111,6 +119,7 @@
                     canResolve: allowed || currentAuthor === '<administration>'
                 });
             },
+
             file_picker_callback: function(callback, value, meta) {
                 if (meta.filetype === 'image') {
                     const input = document.createElement('input');
@@ -137,7 +146,7 @@
                 }
             },
             tinycomments_mode: 'embedded',
-            tinycomments_author: 'Your Name',
+            tinycomments_author: "{{ Auth::user()->first_name ?? 'Guest' }} {{ Auth::user()->last_name ?? '' }}",
             tinycomments_css: 'js/tiny-plugins/tinycomments/css/tinycomments.css',
             content_style: [
                 'ol { list-style: none; counter-reset: item; margin:0; padding:0; }',
@@ -162,12 +171,52 @@
                 // Log ICE change events
                 editor.on('IceChange', e => console.log('ICE Change:', e));
 
-                // Override showcomments to list all comment threads
-                /*         editor.ui.registry.addButton('showcomments', {
-                          icon: 'comment',
-                          tooltip: 'Show All Comments',
-                          onAction: () => editor.execCommand('ToggleSidebar', false, 'comments')
-                        }); */
+// --- Async Paste (with formatting) ---
+editor.ui.registry.addButton('asyncPaste', {
+      icon: 'paste',
+      tooltip: 'Paste',
+      onAction: async () => {
+        try {
+          // Try to read HTML first
+          const [clipboardItem] = await navigator.clipboard.read();
+          const htmlType = clipboardItem.types.find(t => t === 'text/html');
+          if (htmlType) {
+            const blob = await clipboardItem.getType('text/html');
+            const html = await blob.text();
+            editor.insertContent(html);
+          } else {
+            // Fallback to plain text
+            const text = await navigator.clipboard.readText();
+            editor.insertContent(text);
+          }
+        } catch (err) {
+          editor.notificationManager.open({
+            text: 'Paste failed: ' + err.message,
+            type: 'error'
+          });
+        }
+      }
+    });
+
+    // --- Async Paste as Text (no formatting) ---
+    editor.ui.registry.addButton('asyncPasteText', {
+      icon: 'paste-text',
+      tooltip: 'Paste as Text',
+      onAction: async () => {
+        try {
+          const text = await navigator.clipboard.readText();
+          // Insert as plain text (no HTML)
+          editor.insertContent(editor.dom.encode(text));
+        } catch (err) {
+          editor.notificationManager.open({
+            text: 'Paste as Text failed: ' + err.message,
+            type: 'error'
+          });
+        }
+      }
+    });
+
+
             }
         });
     </script>
