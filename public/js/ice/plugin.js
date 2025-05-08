@@ -89,10 +89,31 @@ tinymce.PluginManager.add('ice', function(editor) {
 
 
 
-      editor.ui.registry.addButton('ice_enable_track_changes', {
+      editor.ui.registry.addToggleButton('ice_enable_track_changes', {
         text: 'Enable Track Changes',
-        onAction: () => iceEditor.rejectAll()
+        tooltip: 'Toggle Track Changes',
+        onSetup: function (api) {
+          // initialize as “off”
+          api.setActive(false);
+          return function () {
+            // nothing to clean up
+          };
+        },
+        onAction: function (api) {
+          const enabled = !api.isActive();
+          // visually press/unpress
+          api.setActive(enabled);
+          // swap the label
+          api.setText(enabled ? 'Tracking Changes' : 'Enable Track Changes');
+          // do your actual logic
+          if (enabled) {
+            iceEditor.enableTrackChanges();
+          } else {
+            iceEditor.disableTrackChanges();
+          }
+        }
       });
+
 
 
       // 7) Register the Show/Hide toggle
