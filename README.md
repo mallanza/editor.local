@@ -21,6 +21,11 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
+## Project-specific experiments
+
+- `/quill` – full tracked-changes prototype backed by the database and change ledger.
+- `/quill2` – lightweight demo that keeps all tracking client-side. It renders hidden span markers for every insert/delete so you can inspect change data without persisting anything. Visit `/quill2?seed=Your+text` to preload the editor.
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
