@@ -9,6 +9,8 @@ const DEFAULT_OPTIONS = {
 };
 
 const EMBED_PLACEHOLDER = '[embed]';
+const PREVIEW_MAX_LENGTH = 320;
+const LINEBREAK_MARKER = '\u23ce';
 
 const ensureArray = (value) => (Array.isArray(value) ? value : []);
 
@@ -157,7 +159,7 @@ export default class QuillLiteChangeTracker {
         const contents = this.quill.getContents();
         let cursor = 0;
         let start = null;
-        let length = 0;
+        let end = null;
         ensureArray(contents.ops).forEach((op) => {
             if (!Object.prototype.hasOwnProperty.call(op, 'insert')) {
                 cursor += typeof op.retain === 'number' ? op.retain : 0;
@@ -168,15 +170,14 @@ export default class QuillLiteChangeTracker {
                 if (start === null) {
                     start = cursor;
                 }
-                length += opLength;
-            } else if (start !== null) {
-                return;
+                end = cursor + opLength;
             }
             cursor += opLength;
         });
         if (start === null) {
             return null;
         }
+        const length = Math.max(0, (end ?? start) - start);
         return { index: start, length };
     }
 
@@ -430,7 +431,11 @@ export default class QuillLiteChangeTracker {
     }
 
     _stringPreview(text) {
-        return (text || '').replace(/\n/g, '⏎');
+        const normalized = (text || '').replace(/\n/g, LINEBREAK_MARKER);
+        if (normalized.length <= PREVIEW_MAX_LENGTH) {
+            return normalized;
+        }
+        return `${normalized.slice(0, PREVIEW_MAX_LENGTH - 3)}...`;
     }
 
     _previewFromDelta(delta) {

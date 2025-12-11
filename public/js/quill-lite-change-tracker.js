@@ -18,6 +18,8 @@
     const INSERT_STYLE_VARS = ['--q2-insert-bg', '--q2-insert-border', '--q2-insert-shadow'];
 
     const EMBED_PLACEHOLDER = '[embed]';
+    const PREVIEW_MAX_LENGTH = 320;
+    const LINEBREAK_MARKER = '\u23ce';
 
     const ensureArray = (value) => (Array.isArray(value) ? value : []);
 
@@ -211,7 +213,7 @@
             const contents = this.quill.getContents();
             let cursor = 0;
             let start = null;
-            let length = 0;
+            let end = null;
             ensureArray(contents.ops).forEach((op) => {
                 if (!Object.prototype.hasOwnProperty.call(op, 'insert')) {
                     cursor += typeof op.retain === 'number' ? op.retain : 0;
@@ -223,15 +225,14 @@
                     if (start === null) {
                         start = cursor;
                     }
-                    length += opLength;
-                } else if (start !== null) {
-                    return;
+                    end = cursor + opLength;
                 }
                 cursor += opLength;
             });
             if (start === null) {
                 return null;
             }
+            const length = Math.max(0, (end ?? start) - start);
             return { index: start, length };
         }
 
@@ -355,9 +356,15 @@
             });
             let insertionDelta = new this.Delta().retain(index);
             ensureArray(residualDelta.ops).forEach((op) => {
-                if (Object.prototype.hasOwnProperty.call(op, 'insert')) {
-                    insertionDelta = insertionDelta.insert(op.insert, { [this._blotName]: attrs });
+                if (!Object.prototype.hasOwnProperty.call(op, 'insert')) {
+                    return;
                 }
+                const preservedAttrs = op.attributes ? { ...op.attributes } : {};
+                if (Object.prototype.hasOwnProperty.call(preservedAttrs, this._blotName)) {
+                    delete preservedAttrs[this._blotName];
+                }
+                const mergedAttrs = { ...preservedAttrs, [this._blotName]: attrs };
+                insertionDelta = insertionDelta.insert(op.insert, mergedAttrs);
             });
             this.quill.updateContents(insertionDelta, this.QuillRef.sources.SILENT);
             const direction = this._pendingDeleteDirection;
@@ -549,7 +556,11 @@
         }
 
         _stringPreview(text) {
-            return (text || '').replace(/\n/g, '⏎');
+            const normalized = (text || '').replace(/\n/g, LINEBREAK_MARKER);
+            if (normalized.length <= PREVIEW_MAX_LENGTH) {
+                return normalized;
+            }
+            return `${normalized.slice(0, PREVIEW_MAX_LENGTH - 3)}...`;
         }
 
         _previewFromDelta(delta) {
@@ -570,16 +581,24 @@
                 if (!Object.prototype.hasOwnProperty.call(op, 'insert')) {
                     return;
                 }
+                const opAttrs = op.attributes || null;
                 if (typeof op.insert !== 'string') {
                     hasMeaningfulContent = true;
                     return;
                 }
                 const stripped = op.insert.replace(/\n/g, '').trim();
-                if (stripped.length) {
+                if (stripped.length || this._hasStructuredAttributes(opAttrs)) {
                     hasMeaningfulContent = true;
                 }
             });
             return !hasMeaningfulContent;
+        }
+
+        _hasStructuredAttributes(attrs) {
+            if (!attrs) {
+                return false;
+            }
+            return Object.keys(attrs).some((attrName) => /^(table|ql-table)/i.test(attrName) || attrName.includes('table-'));
         }
 
         _writeDataset(node, data = {}) {

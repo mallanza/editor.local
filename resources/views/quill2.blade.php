@@ -75,6 +75,32 @@
                             <span class="ql-formats">
                                 <button class="ql-clean" type="button"></button>
                             </span>
+                            <span class="ql-formats gap-2">
+                                <button
+                                    type="button"
+                                    id="quill2-paste"
+                                    class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/70 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-700 shadow-sm transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+                                    title="Paste with formatting"
+                                >
+                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
+                                        <path d="M7 4h6v2h3v11H4V6h3V4Z" stroke-linejoin="round" />
+                                        <path d="M8 1.5h4V4H8z" />
+                                    </svg>
+                                    <span class="sr-only">Paste with formatting</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    id="quill2-paste-text"
+                                    class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/70 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-700 shadow-sm transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+                                    title="Paste as plain text"
+                                >
+                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
+                                        <path d="M6 3h8v3h3v11H3V6h3V3Z" stroke-linejoin="round" />
+                                        <path d="M7 9h6M7 12h4" stroke-linecap="round" />
+                                    </svg>
+                                    <span class="sr-only">Paste as text</span>
+                                </button>
+                            </span>
                             <span class="ql-formats">
                                 <button class="ql-table-better" aria-label="Insert table" type="button"></button>
                             </span>
@@ -92,6 +118,64 @@
                                     </svg>
                                 </button>
                             </span>
+                            <span class="ql-formats gap-2">
+                                <button
+                                    type="button"
+                                    id="quill2-accept-current"
+                                    class="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-emerald-700 shadow-sm transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:border-emerald-100 disabled:bg-emerald-50 disabled:text-emerald-300 disabled:pointer-events-none"
+                                    title="Accept selected change"
+                                    aria-label="Accept selected change"
+                                    disabled
+                                >
+                                    <svg class="h-4.5 w-4.5" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false">
+                                        <path d="M8 4h8l5 5v13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke-linejoin="round" />
+                                        <path d="M16 4v5h5" stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M10 15.5l3 3.5 5-6" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span class="sr-only">Accept change</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    id="quill2-reject-current"
+                                    class="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-rose-700 shadow-sm transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:border-rose-100 disabled:bg-rose-50 disabled:text-rose-300 disabled:pointer-events-none"
+                                    title="Decline selected change"
+                                    aria-label="Decline selected change"
+                                    disabled
+                                >
+                                    <svg class="h-4.5 w-4.5" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false">
+                                        <path d="M8 4h8l5 5v13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke-linejoin="round" />
+                                        <path d="M16 4v5h5" stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M11 15l6 6M17 15l-6 6" stroke-linecap="round" />
+                                    </svg>
+                                    <span class="sr-only">Decline change</span>
+                                </button>
+                            </span>
+                            <span class="ql-formats">
+                                <button
+                                    type="button"
+                                    id="quill2-accept-all"
+                                    class="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-700 shadow-sm transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:border-emerald-100 disabled:bg-emerald-50 disabled:text-emerald-300"
+                                    title="Accept all pending changes"
+                                    disabled
+                                >
+                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <path d="M4 10l4 4 8-8" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span class="sr-only">Accept all changes</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    id="quill2-reject-all"
+                                    class="inline-flex items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-3 py-2 text-rose-700 shadow-sm transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:border-rose-100 disabled:bg-rose-50 disabled:text-rose-300"
+                                    title="Decline all pending changes"
+                                    disabled
+                                >
+                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <path d="M5 5l10 10M15 5l-10 10" stroke-linecap="round" />
+                                    </svg>
+                                    <span class="sr-only">Decline all changes</span>
+                                </button>
+                            </span>
                             </div>
                             <div id="quill2-editor" class="ql-container ql-snow min-h-[360px] rounded-b-3xl px-4 py-4"></div>
                         </div>
@@ -105,7 +189,6 @@
                         <div class="flex flex-col gap-6">
                             <section aria-labelledby="quill2-activity-heading" class="space-y-4 rounded-3xl border border-white/70 bg-white/90 p-4 shadow-sm">
                                 <div class="flex items-center justify-between">
-                                    <h3 id="quill2-activity-heading" class="text-sm font-semibold text-slate-800">Activity</h3>
                                     <p id="quill2-activity-summary" class="text-xs font-medium text-slate-500">0 items</p>
                                 </div>
                                 <ul
@@ -230,6 +313,55 @@
             </div>
         </div>
 
+        <div
+            id="quill2-paste-modal"
+            class="fixed inset-0 z-40 hidden items-center justify-center bg-slate-900/40 px-3 py-6 backdrop-blur"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="quill2-paste-title"
+        >
+            <div class="w-full max-w-lg rounded-2xl bg-white shadow-2xl ring-1 ring-black/10">
+                <div class="flex flex-col gap-4 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-[0.6rem] font-semibold uppercase tracking-[0.4em] text-slate-400">Manual Rich Paste</p>
+                            <h2 id="quill2-paste-title" class="text-lg font-semibold text-slate-900">Paste clipboard content</h2>
+                        </div>
+                        <button
+                            type="button"
+                            id="quill2-paste-close"
+                            class="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                            aria-label="Close"
+                        >
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" stroke="currentColor" fill="none" stroke-width="1.8">
+                                <path d="M5 5l10 10M15 5l-10 10" stroke-linecap="round" />
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-500">
+                        Your browser blocked direct clipboard access. Press <span class="font-semibold">Ctrl / Cmd + V</span> inside the pad below to paste your content manually.
+                    </p>
+                    <div
+                        id="quill2-paste-catcher"
+                        class="min-h-[180px] rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-700 focus:outline-none"
+                        contenteditable="true"
+                        role="textbox"
+                        aria-multiline="true"
+                        tabindex="0"
+                    ></div>
+                    <div class="flex justify-end">
+                        <button
+                            type="button"
+                            id="quill2-paste-cancel"
+                            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:bg-slate-50"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 @endsection
 
@@ -290,9 +422,17 @@
 
             const initialContent = @json($initialContent ?? '');
             const initialDelta = @json($initialDelta ?? ['ops' => []]);
+            if (typeof window !== 'undefined') {
+                window.quill2Debug = window.quill2Debug || {};
+                window.quill2Debug.initialDelta = initialDelta;
+            }
             const initialChanges = @json($initialChanges ?? []);
             const initialComments = @json($initialComments ?? []);
             const initialHtml = @json($initialHtml ?? null);
+                        if (typeof window !== 'undefined') {
+                            window.quill2Debug = window.quill2Debug || {};
+                            window.quill2Debug.initialHtml = initialHtml;
+                        }
             const saveEndpoint = @json(route('quill2.save'));
             const deleteEndpoint = @json(route('quill2.destroy'));
             const currentUser = @json($quillUser ?? ['id' => 'guest-user', 'name' => 'Guest User']);
@@ -302,7 +442,7 @@
                 history: {
                     delay: 400,
                     maxStack: 100,
-                    userOnly: true,
+                    userOnly: false,
                 },
             };
             if (betterTableReady) {
@@ -322,6 +462,10 @@
                 theme: 'snow',
                 modules: quillModules,
             });
+            if (typeof window !== 'undefined') {
+                window.quill2Debug = window.quill2Debug || {};
+                window.quill2Debug.quill = quill;
+            }
             const userSource = window.Quill.sources.USER;
             const silentSource = window.Quill.sources.SILENT;
             const editorScrollContainer = quill.root?.parentElement ?? quill.container ?? null;
@@ -340,7 +484,13 @@
             const deleteButton = document.getElementById('quill2-delete');
             const statusEl = document.getElementById('quill2-status');
             const addCommentButton = document.getElementById('quill2-add-comment');
+            const pasteButton = document.getElementById('quill2-paste');
+            const pasteTextButton = document.getElementById('quill2-paste-text');
             const commentModal = document.getElementById('quill2-comment-modal');
+            const pasteModal = document.getElementById('quill2-paste-modal');
+            const pasteCatcher = document.getElementById('quill2-paste-catcher');
+            const pasteModalCancel = document.getElementById('quill2-paste-cancel');
+            const pasteModalClose = document.getElementById('quill2-paste-close');
             const commentForm = document.getElementById('quill2-comment-form');
             const commentBodyInput = document.getElementById('quill2-comment-body');
             const commentSnippetEl = document.getElementById('quill2-comment-snippet');
@@ -349,6 +499,10 @@
             const togglePanelButton = document.getElementById('quill2-toggle-panel');
             const sidePanel = document.getElementById('quill2-side-panel');
             const panelResizer = document.getElementById('quill2-panel-resizer');
+            const acceptChangeButton = document.getElementById('quill2-accept-current');
+            const rejectChangeButton = document.getElementById('quill2-reject-current');
+            const acceptAllButton = document.getElementById('quill2-accept-all');
+            const rejectAllButton = document.getElementById('quill2-reject-all');
 
             const encodeContent = (value = '') => String(value ?? '')
                 .replace(/&/g, '&amp;')
@@ -407,6 +561,31 @@
                 }
             };
 
+            const readClipboardHtml = async () => {
+                if (!navigator.clipboard?.read) {
+                    return '';
+                }
+                try {
+                    const items = await navigator.clipboard.read();
+                    for (let i = 0; i < items.length; i += 1) {
+                        const item = items[i];
+                        const typeList = item?.types ? Array.from(item.types) : [];
+                        const hasHtml = typeList.includes('text/html');
+                        if (!hasHtml) {
+                            continue;
+                        }
+                        const blob = await item.getType('text/html');
+                        const html = await blob.text();
+                        if (html && html.trim().length) {
+                            return html;
+                        }
+                    }
+                } catch (error) {
+                    return '';
+                }
+                return '';
+            };
+
             const getClipboardPayload = (clipboardEvent) => {
                 const payload = { html: '', text: '' };
                 const clipboard = clipboardEvent?.clipboardData || window.clipboardData;
@@ -458,8 +637,137 @@
                     email: currentUser?.email ?? null,
                 },
             });
+            const changeFormatKey = tracker?._blotName || `${tracker.options.attrPrefix}-change`;
+            const changeAttrKeys = [
+                tracker.attrNames.id,
+                tracker.attrNames.type,
+                tracker.attrNames.status,
+                tracker.attrNames.userId,
+                tracker.attrNames.userName,
+                tracker.attrNames.userEmail,
+                tracker.attrNames.timestamp,
+            ].filter(Boolean);
+            let focusedChangeMeta = null;
 
-            const resolvedDelta = (initialDelta && Array.isArray(initialDelta.ops) && initialDelta.ops.length)
+            const stripTemporaryTags = (value) => {
+                if (!value || typeof value !== 'string') {
+                    return '';
+                }
+                return value
+                    .replace(/<temporary[^>]*>/gi, '')
+                    .replace(/<\/temporary>/gi, '');
+            };
+
+            const pruneTableUiArtifacts = (rootNode) => {
+                if (!rootNode) {
+                    return;
+                }
+                const docRef = rootNode.ownerDocument || document;
+                const nodeFilter = docRef.defaultView?.NodeFilter || window.NodeFilter;
+                const NodeCtor = docRef.defaultView?.Node || window.Node;
+                const showElements = nodeFilter?.SHOW_ELEMENT ?? 1;
+                const walker = docRef.createTreeWalker(rootNode, showElements);
+                const removalQueue = [];
+                while (walker.nextNode()) {
+                    const node = walker.currentNode;
+                    if (!node?.tagName) {
+                        continue;
+                    }
+                    const tag = node.tagName.toLowerCase();
+                    if (tag === 'temporary') {
+                        removalQueue.push(node);
+                        continue;
+                    }
+                    if (tag === 'table' && NodeCtor) {
+                        const childNodes = Array.from(node.childNodes || []);
+                        childNodes.forEach((child) => {
+                            const isWhitespaceText = child.nodeType === NodeCtor.TEXT_NODE && !child.textContent.trim();
+                            const isBreak = child.nodeType === NodeCtor.ELEMENT_NODE && child.tagName?.toLowerCase() === 'br';
+                            if (isWhitespaceText || isBreak) {
+                                child.remove();
+                            }
+                        });
+                    }
+                    if (node.classList?.contains('ql-cell-focused')) {
+                        node.classList.remove('ql-cell-focused');
+                        if (!node.classList.length) {
+                            node.removeAttribute('class');
+                        }
+                    }
+                }
+                removalQueue.forEach((node) => {
+                    const fragment = document.createDocumentFragment();
+                    while (node.firstChild) {
+                        fragment.appendChild(node.firstChild);
+                    }
+                    node.replaceWith(fragment);
+                });
+            };
+
+            const pruneOrphanBreaks = (rootNode) => {
+                if (!rootNode) {
+                    return;
+                }
+                const docRef = rootNode.ownerDocument || document;
+                const NodeCtor = docRef.defaultView?.Node || window.Node;
+                if (!NodeCtor) {
+                    return;
+                }
+                const isDisposable = (node) => {
+                    if (!node) {
+                        return false;
+                    }
+                    if (node.nodeType === NodeCtor.TEXT_NODE) {
+                        return !node.textContent.trim();
+                    }
+                    if (node.nodeType === NodeCtor.ELEMENT_NODE && node.tagName?.toLowerCase() === 'br') {
+                        return true;
+                    }
+                    return false;
+                };
+                while (isDisposable(rootNode.firstChild)) {
+                    rootNode.firstChild.remove();
+                }
+                while (isDisposable(rootNode.lastChild)) {
+                    rootNode.lastChild.remove();
+                }
+            };
+
+            const sanitizeHydratedHtml = (html) => {
+                if (!html || typeof html !== 'string') {
+                    return '';
+                }
+                try {
+                    const normalized = stripTemporaryTags(html);
+                    const parser = new DOMParser();
+                    const parsed = parser.parseFromString(normalized, 'text/html');
+                    pruneTableUiArtifacts(parsed?.body);
+                    pruneOrphanBreaks(parsed?.body);
+                    return parsed?.body?.innerHTML ?? normalized;
+                } catch (error) {
+                    return html;
+                }
+            };
+
+            if (typeof window !== 'undefined' && window.quill2Debug) {
+                window.quill2Debug.sanitizeHydratedHtml = sanitizeHydratedHtml;
+            }
+
+            const serializeEditorHtml = () => {
+                if (!quill?.root) {
+                    return '';
+                }
+                const clone = quill.root.cloneNode(true);
+                pruneTableUiArtifacts(clone);
+                return clone.innerHTML;
+            };
+
+            if (typeof window !== 'undefined' && window.quill2Debug) {
+                window.quill2Debug.serializeEditorHtml = serializeEditorHtml;
+            }
+
+            const hasStoredDelta = Boolean(initialDelta && Array.isArray(initialDelta.ops) && initialDelta.ops.length);
+            const resolvedDelta = hasStoredDelta
                 ? initialDelta
                 : {
                     ops: [
@@ -469,9 +777,12 @@
                     ],
                 };
             if (initialHtml) {
-                quill.clipboard.dangerouslyPasteHTML(initialHtml, 'silent');
+                const hydratedHtml = sanitizeHydratedHtml(initialHtml);
+                quill.clipboard.dangerouslyPasteHTML(0, hydratedHtml, 'silent');
+            } else if (hasStoredDelta) {
+                quill.setContents(resolvedDelta, silentSource);
             } else {
-                quill.setContents(resolvedDelta);
+                quill.setContents(resolvedDelta, silentSource);
             }
 
             const setStatus = (message, tone = 'muted') => {
@@ -493,6 +804,7 @@
                 open: 'Hide Comments',
                 closed: 'Show Comments',
             };
+            const MANUAL_PASTE_CANCELLED = 'quill2-manual-paste-cancelled';
 
             const applyViewToggleStyles = () => {
                 const toggles = [
@@ -513,9 +825,13 @@
                 if (!togglePanelButton) {
                     return;
                 }
-                togglePanelButton.textContent = isSidePanelOpen
+                const baseLabel = isSidePanelOpen
                     ? PANEL_TOGGLE_LABELS.open
                     : PANEL_TOGGLE_LABELS.closed;
+                const commentCount = commentLog.length;
+                togglePanelButton.textContent = commentCount > 0
+                    ? `${baseLabel} (${commentCount})`
+                    : baseLabel;
             };
 
             const refreshPanelVisibility = () => {
@@ -645,6 +961,132 @@
             });
 
             const countPendingChanges = () => tracker.getChanges().filter((change) => change.status === 'pending').length;
+            const pluralizeWord = (count, singular, plural = `${singular}s`) => (count === 1 ? singular : plural);
+            const describePendingSummary = (count) => `${count} pending ${pluralizeWord(count, 'change')}`;
+
+            const resolveChangeMetaAtSelection = () => {
+                const selection = quill.getSelection();
+                if (!selection) {
+                    return null;
+                }
+                const probes = [];
+                if (selection.length && selection.length > 0) {
+                    probes.push({ index: selection.index, length: selection.length });
+                } else {
+                    probes.push({ index: selection.index, length: 0 });
+                    if (selection.index > 0) {
+                        probes.push({ index: selection.index - 1, length: 1 });
+                    }
+                }
+                for (let i = 0; i < probes.length; i += 1) {
+                    const probe = probes[i];
+                    const format = quill.getFormat(Math.max(0, probe.index), probe.length);
+                    const meta = format?.[changeFormatKey];
+                    if (!meta) {
+                        continue;
+                    }
+                    const changeId = meta?.[tracker.attrNames.id];
+                    if (changeId) {
+                        return meta;
+                    }
+                }
+                return null;
+            };
+
+            const describeChangeType = (meta) => (meta?.[tracker.attrNames.type] === 'delete' ? 'deletion' : 'insertion');
+
+            const formatChangePreview = (value = '') => {
+                const linebreakMarker = String.fromCharCode(0x23ce);
+                return value.replace(/\n/g, linebreakMarker);
+            };
+
+            const collectTrackedChangesFromDom = () => {
+                if (!quill?.root || !tracker?.attrNames) {
+                    return [];
+                }
+                const selector = `[${tracker.attrNames.id}]`;
+                const nodes = quill.root.querySelectorAll(selector);
+                if (!nodes.length) {
+                    return [];
+                }
+                const changeMap = new Map();
+                nodes.forEach((node) => {
+                    const changeId = node.getAttribute(tracker.attrNames.id);
+                    if (!changeId || changeMap.has(changeId)) {
+                        return;
+                    }
+                    const range = tracker.findChangeRange(changeId);
+                    const snippet = (range && range.length)
+                        ? quill.getText(range.index, range.length)
+                        : (node.textContent || '');
+                    const createdAt = node.getAttribute(tracker.attrNames.timestamp) || new Date().toISOString();
+                    const userEmailAttr = tracker.attrNames.userEmail
+                        ? node.getAttribute(tracker.attrNames.userEmail)
+                        : null;
+                    changeMap.set(changeId, {
+                        id: changeId,
+                        type: node.getAttribute(tracker.attrNames.type) === 'delete' ? 'delete' : 'insert',
+                        status: node.getAttribute(tracker.attrNames.status) || 'pending',
+                        preview: formatChangePreview(snippet),
+                        createdAt,
+                        updatedAt: createdAt,
+                        length: range?.length ?? snippet.length,
+                        user: {
+                            id: node.getAttribute(tracker.attrNames.userId) || 'unknown-user',
+                            name: node.getAttribute(tracker.attrNames.userName) || 'Unknown',
+                            email: userEmailAttr || null,
+                        },
+                    });
+                });
+                return Array.from(changeMap.values());
+            };
+
+            const updateBulkChangeButtons = (pendingCountOverride = null) => {
+                const pendingCount = Number.isFinite(pendingCountOverride)
+                    ? pendingCountOverride
+                    : countPendingChanges();
+                const hasPending = pendingCount > 0;
+                const summaryLabel = describePendingSummary(pendingCount);
+                if (acceptAllButton) {
+                    acceptAllButton.disabled = !hasPending;
+                    acceptAllButton.setAttribute('aria-disabled', String(!hasPending));
+                    acceptAllButton.setAttribute('title', hasPending ? `Accept ${summaryLabel}` : 'No pending changes to accept');
+                }
+                if (rejectAllButton) {
+                    rejectAllButton.disabled = !hasPending;
+                    rejectAllButton.setAttribute('aria-disabled', String(!hasPending));
+                    rejectAllButton.setAttribute('title', hasPending ? `Decline ${summaryLabel}` : 'No pending changes to decline');
+                }
+            };
+
+            const setChangeActionButtonState = (button, intent, descriptor, enabled) => {
+                if (!button) {
+                    return;
+                }
+                button.disabled = !enabled;
+                button.setAttribute('aria-disabled', String(!enabled));
+                const fallbackHint = intent === 'accept'
+                    ? 'Place your cursor inside a tracked change to accept it'
+                    : 'Place your cursor inside a tracked change to decline it';
+                const actionVerb = intent === 'accept' ? 'Accept' : 'Decline';
+                button.setAttribute('title', enabled ? `${actionVerb} this ${descriptor}` : fallbackHint);
+            };
+
+            const updateChangeActionButtons = (metaOverride = null) => {
+                const meta = metaOverride || resolveChangeMetaAtSelection();
+                const changeId = meta?.[tracker.attrNames.id] || null;
+                const status = meta?.[tracker.attrNames.status];
+                const descriptor = describeChangeType(meta) || 'change';
+                const isPending = Boolean(changeId) && status === 'pending';
+                focusedChangeMeta = isPending
+                    ? {
+                        id: changeId,
+                        type: meta?.[tracker.attrNames.type] || 'insert',
+                    }
+                    : null;
+                setChangeActionButtonState(acceptChangeButton, 'accept', descriptor, isPending);
+                setChangeActionButtonState(rejectChangeButton, 'decline', descriptor, isPending);
+            };
 
             const formatActivityTime = (isoString) => {
                 if (!isoString) {
@@ -653,25 +1095,18 @@
                 return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             };
 
-            const buildActivityItems = () => {
-                const changeItems = tracker.getChanges({ sort: 'asc' }).map((change) => ({
-                    type: 'change',
-                    id: change.id,
-                    createdAt: change.createdAt ?? change.updatedAt ?? new Date().toISOString(),
-                    payload: change,
-                }));
-                const commentItems = commentLog.map((comment) => ({
+            const buildActivityItems = () => commentLog
+                .map((comment) => ({
                     type: 'comment',
                     id: comment.id,
                     createdAt: comment.createdAt ?? new Date().toISOString(),
                     payload: comment,
-                }));
-                return [...changeItems, ...commentItems].sort((a, b) => {
+                }))
+                .sort((a, b) => {
                     const aTime = new Date(a.createdAt).getTime();
                     const bTime = new Date(b.createdAt).getTime();
                     return aTime - bTime;
                 });
-            };
 
             const focusEditorRange = (range) => {
                 if (!range || !Number.isFinite(range.index)) {
@@ -727,6 +1162,86 @@
                     const normalizedEnd = normalizedStart + Math.max(1, commentLength);
                     return start <= normalizedEnd && normalizedStart <= end;
                 }) || null;
+            };
+
+            const captureTrackedSegments = (index, length) => {
+                if (!Number.isFinite(index) || !Number.isFinite(length) || length <= 0) {
+                    return [];
+                }
+                const delta = quill.getContents(index, length);
+                const segments = [];
+                let cursor = 0;
+                (delta?.ops || []).forEach((op) => {
+                    if (!Object.prototype.hasOwnProperty.call(op, 'insert')) {
+                        cursor += typeof op.retain === 'number' ? op.retain : 0;
+                        return;
+                    }
+                    const opLength = typeof op.insert === 'string'
+                        ? op.insert.length
+                        : 1;
+                    const opAttrs = op.attributes || null;
+                    const changeAttrs = (() => {
+                        if (!opAttrs) {
+                            return null;
+                        }
+                        if (opAttrs[changeFormatKey]?.[tracker.attrNames.id]) {
+                            return opAttrs[changeFormatKey];
+                        }
+                        if (opAttrs[tracker.attrNames.id]) {
+                            return opAttrs;
+                        }
+                        return null;
+                    })();
+                    if (changeAttrs?.[tracker.attrNames.id]) {
+                        const preservedAttrs = {};
+                        changeAttrKeys.forEach((key) => {
+                            const value = changeAttrs[key];
+                            if (value) {
+                                preservedAttrs[key] = value;
+                            }
+                        });
+                        if (opLength > 0 && Object.keys(preservedAttrs).length) {
+                            segments.push({
+                                index: index + cursor,
+                                length: opLength,
+                                meta: preservedAttrs,
+                            });
+                        }
+                    }
+                    cursor += opLength;
+                });
+                return segments;
+            };
+
+            const reapplyInsertStylesForSegments = (segments = []) => {
+                if (!segments.length || !tracker || typeof tracker._ensureInsertStyle !== 'function') {
+                    return;
+                }
+                const root = quill?.root;
+                if (!root) {
+                    return;
+                }
+                const insertMetaById = new Map();
+                segments.forEach(({ meta }) => {
+                    const changeId = meta?.[tracker.attrNames.id];
+                    if (!changeId || meta?.[tracker.attrNames.type] !== 'insert') {
+                        return;
+                    }
+                    if (!insertMetaById.has(changeId)) {
+                        insertMetaById.set(changeId, meta);
+                    }
+                });
+                if (!insertMetaById.size) {
+                    return;
+                }
+                const candidates = root.querySelectorAll(`[${tracker.attrNames.id}]`);
+                candidates.forEach((node) => {
+                    const changeId = node.getAttribute(tracker.attrNames.id);
+                    if (!insertMetaById.has(changeId)) {
+                        return;
+                    }
+                    tracker._ensureInsertStyle(node, insertMetaById.get(changeId));
+                });
             };
 
             const highlightPanelItemForChange = (changeId) => {
@@ -789,6 +1304,51 @@
                 }
             };
 
+            const captureManualRichPaste = () => new Promise((resolve, reject) => {
+                if (!pasteModal || !pasteCatcher) {
+                    reject(new Error('quill2-manual-paste-missing'));
+                    return;
+                }
+                const cleanup = () => {
+                    pasteModal.classList.add('hidden');
+                    pasteModal.classList.remove('flex');
+                    toggleBodyScroll(false);
+                    pasteCatcher.innerHTML = '';
+                    pasteCatcher.removeEventListener('paste', handlePaste);
+                    pasteCatcher.removeEventListener('keydown', handleKeydown);
+                    pasteModalCancel?.removeEventListener('click', handleCancel);
+                    pasteModalClose?.removeEventListener('click', handleCancel);
+                };
+                const handleCancel = () => {
+                    cleanup();
+                    const error = new Error(MANUAL_PASTE_CANCELLED);
+                    error.code = MANUAL_PASTE_CANCELLED;
+                    reject(error);
+                };
+                const handleKeydown = (event) => {
+                    if (event.key === 'Escape') {
+                        event.preventDefault();
+                        handleCancel();
+                    }
+                };
+                const handlePaste = (event) => {
+                    event.preventDefault();
+                    const html = event.clipboardData?.getData('text/html') || '';
+                    const text = event.clipboardData?.getData('text/plain') || '';
+                    cleanup();
+                    resolve({ html, text });
+                };
+                pasteModal.classList.remove('hidden');
+                pasteModal.classList.add('flex');
+                toggleBodyScroll(true);
+                pasteCatcher.innerHTML = '';
+                window.requestAnimationFrame(() => pasteCatcher.focus());
+                pasteCatcher.addEventListener('paste', handlePaste, { once: true });
+                pasteCatcher.addEventListener('keydown', handleKeydown);
+                pasteModalCancel?.addEventListener('click', handleCancel, { once: true });
+                pasteModalClose?.addEventListener('click', handleCancel, { once: true });
+            });
+
             const handlePanelItemSelection = (element) => {
                 if (!element) {
                     return;
@@ -813,143 +1373,51 @@
                 if (!activityFeedEl) {
                     return;
                 }
-                const rawEntries = buildActivityItems();
-                const pendingEntries = [];
-                const resolvedChangeEntries = [];
-                rawEntries.forEach((entry) => {
-                    if (entry.type === 'change' && entry.payload?.status && entry.payload.status !== 'pending') {
-                        resolvedChangeEntries.push(entry);
-                    } else {
-                        pendingEntries.push(entry);
-                    }
-                });
+                const commentEntries = buildActivityItems();
                 const pendingCount = countPendingChanges();
+                updateBulkChangeButtons(pendingCount);
                 if (activitySummaryEl) {
-                    const totalCount = rawEntries.length;
-                    const itemLabel = totalCount === 1 ? 'item' : 'items';
-                    const pendingLabel = pendingCount === 1 ? 'pending change' : 'pending changes';
-                    activitySummaryEl.textContent = `${totalCount} ${itemLabel} • ${pendingCount} ${pendingLabel}`;
+                    const totalCount = commentEntries.length;
+                    const label = pluralizeWord(totalCount, 'comment');
+                    activitySummaryEl.textContent = `${totalCount} ${label}`;
                 }
+                updatePanelToggleLabel();
 
                 clearActivePanelHighlight();
                 activityFeedEl.innerHTML = '';
-                if (!pendingEntries.length) {
-                    const empty = document.createElement('li');
-                    empty.className = 'rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-4 text-xs font-medium text-slate-500';
-                    empty.textContent = resolvedChangeEntries.length
-                        ? 'No active items. Completed changes live under History.'
-                        : 'Start typing or add a comment to see activity.';
-                    activityFeedEl.appendChild(empty);
-                } else {
-                    pendingEntries.forEach((entry) => {
-                        if (entry.type === 'comment') {
-                            const comment = entry.payload;
-                            const item = document.createElement('li');
-                            item.className = 'rounded-2xl border border-amber-100 bg-white/90 p-4 shadow-sm';
-                            item.dataset.activityType = 'comment';
-                            item.dataset.commentId = comment.id;
-                            item.setAttribute('tabindex', '-1');
-                            const authorName = encodeContent(comment.author?.name ?? comment.author ?? 'Unknown');
-                            const body = encodeContent(comment.text ?? '');
-                            const snippet = encodeContent(comment.snippet ?? '');
-                            item.innerHTML = `
-                                <div class="flex items-center justify-between text-xs text-gray-500">
-                                    <span class="font-semibold text-gray-700">Comment • ${authorName}</span>
-                                    <time datetime="${comment.createdAt ?? ''}">${formatActivityTime(comment.createdAt)}</time>
-                                </div>
-                                <p class="mt-2 text-sm text-gray-800">${body}</p>
-                                <p class="mt-2 text-xs text-gray-500">Excerpt: <span class="font-mono text-gray-700">${snippet}</span></p>
-                            `;
-                            activityFeedEl.appendChild(item);
-                            return;
-                        }
-                        const record = entry.payload;
+                if (commentEntries.length) {
+                    commentEntries.forEach((entry) => {
+                        const comment = entry.payload;
                         const item = document.createElement('li');
-                        item.className = 'rounded-2xl border border-slate-100 bg-white/95 p-4 shadow-sm';
-                        item.dataset.activityType = 'change';
-                        item.dataset.changeId = record.id;
+                        item.className = 'rounded-2xl border border-amber-100 bg-white/90 p-4 shadow-sm';
+                        item.dataset.activityType = 'comment';
+                        item.dataset.commentId = comment.id;
                         item.setAttribute('tabindex', '-1');
-                        const statusCls = record.type === 'insert' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700';
-                        const actor = record.user?.name ?? 'Unknown';
-                        const statusLabel = record.status;
-                        const resolutionSuffix = record.status !== 'pending'
-                            ? ` · ${record.resolvedBy?.name ?? 'Unknown'}`
-                            : '';
+                        const authorName = encodeContent(comment.author?.name ?? comment.author ?? 'Unknown');
+                        const body = encodeContent(comment.text ?? '');
+                        const snippet = encodeContent(comment.snippet ?? '');
                         item.innerHTML = `
                             <div class="flex items-center justify-between text-xs text-gray-500">
-                                <span class="font-semibold text-slate-800">Change • ${record.type}</span>
-                                <time datetime="${record.createdAt ?? ''}">${formatActivityTime(record.createdAt)}</time>
+                                <span class="font-semibold text-gray-700">${authorName}</span>
+                                <time datetime="${comment.createdAt ?? ''}">${formatActivityTime(comment.createdAt)}</time>
                             </div>
-                            <p class="mt-3 break-words text-slate-800">${record.preview}</p>
-                            <div class="mt-3 text-xs text-slate-500">
-                                <span>Author: <strong>${actor}</strong></span>
-                            </div>
-                            <div class="mt-2 flex items-center justify-between text-xs text-slate-500">
-                                <span>Status: <strong class="capitalize">${statusLabel}</strong>${resolutionSuffix}</span>
-                                <span class="rounded-full px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wide ${statusCls}">${record.id.slice(0, 8)}</span>
-                            </div>
-                            <div class="mt-4 flex gap-2">
-                                <button
-                                    type="button"
-                                    class="flex-1 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-emerald-500"
-                                    data-change-action="accept"
-                                    data-change-id="${record.id}"
-                                >
-                                    Accept
-                                </button>
-                                <button
-                                    type="button"
-                                    class="flex-1 rounded-full bg-rose-600 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-rose-500"
-                                    data-change-action="reject"
-                                    data-change-id="${record.id}"
-                                >
-                                    Reject
-                                </button>
-                            </div>
+                            <p class="mt-2 text-sm text-gray-800">${body}</p>
+                            </p>
                         `;
+                        /* <p class="mt-2 text-xs text-gray-500">Excerpt: <span class="font-mono text-gray-700">${snippet}</span> */
                         activityFeedEl.appendChild(item);
                     });
                 }
 
                 if (historyCountEl) {
-                    historyCountEl.textContent = resolvedChangeEntries.length;
+                    historyCountEl.textContent = '0';
                 }
                 if (historySection) {
-                    const hasHistory = resolvedChangeEntries.length > 0;
-                    historySection.classList.toggle('hidden', !hasHistory);
-                    if (!hasHistory) {
-                        historySection.open = false;
-                    }
+                    historySection.classList.add('hidden');
+                    historySection.open = false;
                 }
                 if (historyFeedEl) {
                     historyFeedEl.innerHTML = '';
-                    if (resolvedChangeEntries.length) {
-                        resolvedChangeEntries.forEach((entry) => {
-                            const record = entry.payload;
-                            const item = document.createElement('li');
-                            item.className = 'rounded-2xl border border-slate-100 bg-white p-3 text-xs text-slate-600 shadow-sm';
-                            item.dataset.activityType = 'change';
-                            item.dataset.changeId = record.id;
-                            item.setAttribute('tabindex', '-1');
-                            const statusCls = record.type === 'insert' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700';
-                            const actor = record.user?.name ?? 'Unknown';
-                            const resolver = record.resolvedBy?.name ?? actor;
-                            item.innerHTML = `
-                                <div class="flex items-center justify-between text-[0.65rem] uppercase tracking-wide text-slate-500">
-                                    <span class="font-semibold text-slate-700">Change • ${record.type}</span>
-                                    <span class="rounded-full px-2 py-0.5 text-[0.6rem] font-semibold ${statusCls}">${record.status}</span>
-                                </div>
-                                <p class="mt-2 text-sm text-slate-800">${record.preview}</p>
-                                <div class="mt-2 space-y-1 text-[0.7rem] text-slate-500">
-                                    <p><span class="font-semibold text-slate-700">Author:</span> ${actor}</p>
-                                    <p><span class="font-semibold text-slate-700">Resolved by:</span> ${resolver}</p>
-                                    <p><span class="font-semibold text-slate-700">Updated:</span> ${formatActivityTime(record.updatedAt ?? record.createdAt)}</p>
-                                    <p class="font-mono text-[0.65rem] text-slate-400">${record.id.slice(0, 12)}</p>
-                                </div>
-                            `;
-                            historyFeedEl.appendChild(item);
-                        });
-                    }
                 }
                 restoreActivePanelItem();
             };
@@ -969,16 +1437,6 @@
             };
 
             activityFeedEl?.addEventListener('click', (event) => {
-                const changeButton = event.target.closest('[data-change-action]');
-                if (changeButton) {
-                    const { changeAction, changeId } = changeButton.dataset;
-                    if (changeAction === 'accept') {
-                        tracker.acceptChange(changeId);
-                    } else if (changeAction === 'reject') {
-                        tracker.rejectChange(changeId);
-                    }
-                    return;
-                }
                 const card = event.target.closest('[data-activity-type]');
                 if (card) {
                     handlePanelItemSelection(card);
@@ -1034,6 +1492,106 @@
             };
 
             addCommentButton?.addEventListener('click', addCommentFromSelection);
+            pasteButton?.addEventListener('click', () => pasteFromClipboard(false));
+            pasteTextButton?.addEventListener('click', () => pasteFromClipboard(true));
+
+            const toolbarModule = quill.getModule('toolbar');
+            if (toolbarModule && typeof toolbarModule.addHandler === 'function') {
+                const originalCleanHandler = typeof toolbarModule.handlers?.clean === 'function'
+                    ? toolbarModule.handlers.clean.bind(toolbarModule)
+                    : null;
+                toolbarModule.addHandler('clean', (value) => {
+                    const selection = quill.getSelection();
+                    const effectiveRange = (() => {
+                        if (!selection) {
+                            const totalLength = quill.getLength();
+                            return { index: 0, length: totalLength };
+                        }
+                        if (selection.length && selection.length > 0) {
+                            return { index: selection.index, length: selection.length };
+                        }
+                        const docLength = quill.getLength();
+                        const caretIndex = Math.max(0, Math.min(selection.index, Math.max(0, docLength - 1)));
+                        const scopeLength = Math.max(0, Math.min(1, docLength - caretIndex));
+                        return { index: caretIndex, length: scopeLength };
+                    })();
+                    const preservedSegments = captureTrackedSegments(
+                        effectiveRange.index,
+                        effectiveRange.length,
+                    );
+                    if (originalCleanHandler) {
+                        originalCleanHandler(value);
+                    } else if (selection) {
+                        const { index, length } = effectiveRange;
+                        if (length > 0) {
+                            quill.removeFormat(index, length, userSource);
+                        }
+                    } else {
+                        quill.removeFormat(0, quill.getLength(), userSource);
+                    }
+                    preservedSegments.forEach(({ index: segIndex, length: segLength, meta }) => {
+                        if (segLength > 0 && meta?.[tracker.attrNames.id]) {
+                            const formatPayload = { [changeFormatKey]: { ...meta } };
+                            quill.formatText(segIndex, segLength, formatPayload, silentSource);
+                        }
+                    });
+                    if (preservedSegments.length) {
+                        reapplyInsertStylesForSegments(preservedSegments);
+                        refreshChangeTooltips();
+                        decorateTrackedTables();
+                    }
+                });
+            }
+
+            const handleFocusedChangeResolution = (action) => {
+                const changeId = focusedChangeMeta?.id;
+                if (!changeId) {
+                    setStatus('Place your cursor inside a tracked change first.', 'error');
+                    return;
+                }
+                const record = tracker.getChange(changeId);
+                if (!record || record.status !== 'pending') {
+                    focusedChangeMeta = null;
+                    updateChangeActionButtons();
+                    setStatus('This change has already been resolved.', 'error');
+                    return;
+                }
+                if (action === 'accept') {
+                    tracker.acceptChange(changeId);
+                } else {
+                    tracker.rejectChange(changeId);
+                }
+                const descriptor = record.type === 'delete' ? 'deletion' : 'insertion';
+                const verb = action === 'accept' ? 'Accepted' : 'Declined';
+                const tone = action === 'accept' ? 'success' : 'error';
+                setStatus(`${verb} this ${descriptor}.`, tone);
+                updateChangeActionButtons();
+                finalizeHistoryBatch();
+            };
+
+            acceptChangeButton?.addEventListener('click', () => handleFocusedChangeResolution('accept'));
+            rejectChangeButton?.addEventListener('click', () => handleFocusedChangeResolution('decline'));
+
+            const handleBulkChangeResolution = (action) => {
+                const pendingCount = countPendingChanges();
+                if (!pendingCount) {
+                    const actionLabel = action === 'accept' ? 'accept' : 'decline';
+                    setStatus(`No pending changes to ${actionLabel}.`, 'error');
+                    return;
+                }
+                if (action === 'accept') {
+                    tracker.acceptAll();
+                } else {
+                    tracker.rejectAll();
+                }
+                const tone = action === 'accept' ? 'success' : 'error';
+                const verb = action === 'accept' ? 'Accepted' : 'Declined';
+                setStatus(`${verb} ${describePendingSummary(pendingCount)}.`, tone);
+                finalizeHistoryBatch();
+            };
+
+            acceptAllButton?.addEventListener('click', () => handleBulkChangeResolution('accept'));
+            rejectAllButton?.addEventListener('click', () => handleBulkChangeResolution('decline'));
 
             const persistComment = (body) => {
                 if (!pendingCommentSelection) {
@@ -1129,6 +1687,53 @@
                 return `${verb} by ${actor} on ${timestamp}${excerpt}`;
             };
 
+            const TABLE_CHANGE_ATTR = 'data-q2-table-change';
+            const tableChangeClasses = ['q2-table-change--insert', 'q2-table-change--delete'];
+
+            const decorateTrackedTables = () => {
+                if (!quill?.root) {
+                    return;
+                }
+                const changeMap = new Map(tracker.getChanges({ sort: 'asc' }).map((change) => [change.id, change]));
+                const tables = quill.root.querySelectorAll('table');
+                tables.forEach((table) => {
+                    table.removeAttribute(TABLE_CHANGE_ATTR);
+                    tableChangeClasses.forEach((className) => table.classList.remove(className));
+                    table.removeAttribute('title');
+                    table.removeAttribute('data-q2-table-change-by');
+                });
+                const trackedNodes = quill.root.querySelectorAll('table [data-q2-change-id]');
+                if (!trackedNodes.length) {
+                    return;
+                }
+                trackedNodes.forEach((node) => {
+                    const table = node.closest('table');
+                    if (!table) {
+                        return;
+                    }
+                    const changeType = node.getAttribute(tracker.attrNames.type);
+                    const changeId = node.getAttribute(tracker.attrNames.id);
+                    if (!changeType) {
+                        return;
+                    }
+                    const normalizedType = changeType === 'delete' ? 'delete' : 'insert';
+                    table.setAttribute(TABLE_CHANGE_ATTR, normalizedType);
+                    table.classList.add(`q2-table-change--${normalizedType}`);
+                    if (!changeId) {
+                        return;
+                    }
+                    const changeMeta = changeMap.get(changeId);
+                    const tooltip = describeChangeTooltip(changeMeta);
+                    if (tooltip) {
+                        table.setAttribute('title', tooltip);
+                        if (changeMeta?.user?.name || changeMeta?.user?.email) {
+                            const actor = changeMeta.user.name || changeMeta.user.email;
+                            table.setAttribute('data-q2-table-change-by', actor);
+                        }
+                    }
+                });
+            };
+
             const refreshChangeTooltips = () => {
                 if (!quill || !quill.root) {
                     return;
@@ -1151,24 +1756,82 @@
                 });
             };
 
+            const pruneResolvedChangeArtifacts = () => {
+                if (!quill?.root || !tracker?.options?.attrPrefix) {
+                    return;
+                }
+                const blotClass = `${tracker.options.attrPrefix}-change-inline`;
+                const selector = `.${blotClass}:not([${tracker.attrNames.id}])`;
+                const staleNodes = quill.root.querySelectorAll(selector);
+                if (!staleNodes.length) {
+                    return;
+                }
+                staleNodes.forEach((node) => {
+                    node.removeAttribute('title');
+                    node.classList.remove(blotClass);
+                    if (!node.classList.length) {
+                        node.removeAttribute('class');
+                    }
+                    if (!node.getAttribute('style')?.trim()) {
+                        node.removeAttribute('style');
+                    }
+                    if (node.hasAttributes()) {
+                        return;
+                    }
+                    const fragment = document.createDocumentFragment();
+                    while (node.firstChild) {
+                        fragment.appendChild(node.firstChild);
+                    }
+                    node.replaceWith(fragment);
+                });
+            };
+
+            const finalizeHistoryBatch = () => {
+                if (quill?.history?.cutoff) {
+                    quill.history.cutoff();
+                }
+            };
+
             tracker.on('ledger-change', (changes) => {
                 renderActivityFeed();
                 renderHiddenSpans(changes);
                 refreshChangeTooltips();
+                decorateTrackedTables();
+                pruneResolvedChangeArtifacts();
+                updateChangeActionButtons();
+                updateBulkChangeButtons();
             });
 
-            if (Array.isArray(initialChanges) && initialChanges.length) {
-                tracker.loadChanges(initialChanges);
-            } else {
+            const seedInitialChanges = () => {
+                if (Array.isArray(initialChanges) && initialChanges.length) {
+                    tracker.loadChanges(initialChanges);
+                    return true;
+                }
+                const domHydrated = collectTrackedChangesFromDom();
+                if (domHydrated.length) {
+                    tracker.loadChanges(domHydrated);
+                    return true;
+                }
+                return false;
+            };
+
+            if (!seedInitialChanges()) {
                 renderActivityFeed();
                 renderHiddenSpans(tracker.getChanges({ sort: 'asc' }));
             }
 
             refreshChangeTooltips();
+            decorateTrackedTables();
+            pruneResolvedChangeArtifacts();
             applyCommentHighlights();
+            updateBulkChangeButtons();
             refreshPanelVisibility();
-            quill.on('selection-change', updateCommentButtonState);
-            updateCommentButtonState();
+            const handleSelectionChange = () => {
+                updateCommentButtonState();
+                updateChangeActionButtons();
+            };
+            quill.on('selection-change', handleSelectionChange);
+            handleSelectionChange();
 
             downloadButton?.addEventListener('click', () => {
                 const payload = tracker.snapshot();
@@ -1203,12 +1866,16 @@
             };
 
             const BLOCKLIST_TAGS = ['meta', 'style', 'script', 'link', 'iframe', 'object', 'embed', 'o:p', 'xml'];
-            const GLOBAL_PASTE_ATTRS = new Set(['href', 'src', 'alt', 'title', 'colspan', 'rowspan', 'cellpadding', 'cellspacing', 'width', 'height']);
+            const BLOCKLIST_TAG_SET = new Set(BLOCKLIST_TAGS.map((tag) => tag.toLowerCase()));
+            const GLOBAL_PASTE_ATTRS = new Set(['href', 'src', 'alt', 'title', 'colspan', 'rowspan', 'cellpadding', 'cellspacing', 'width', 'height', 'scope']);
             const TAG_PASTE_ATTRS = {
                 a: new Set(['href', 'title', 'target', 'rel']),
                 img: new Set(['src', 'alt', 'title', 'width', 'height']),
-                td: new Set(['colspan', 'rowspan']),
-                th: new Set(['colspan', 'rowspan']),
+                td: new Set(['colspan', 'rowspan', 'width', 'height']),
+                th: new Set(['colspan', 'rowspan', 'scope', 'width', 'height']),
+                table: new Set(['border', 'cellpadding', 'cellspacing']),
+                col: new Set(['span', 'width']),
+                colgroup: new Set(['span']),
             };
             const WORD_STRIP_REGEXES = [
                 /<!--\[if.*?endif\]-->/gis,
@@ -1219,6 +1886,10 @@
                 /class="?Mso[a-z0-9]+"?/gi,
                 /lang="?[a-z-]+"?/gi,
             ];
+
+            const TABLE_STRUCTURE_TAGS = new Set(['table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'colgroup', 'col']);
+            const SAFE_DATA_ATTR_PATTERN = /^data-[a-z0-9_\-:]+$/i;
+            const CLASS_TOKEN_PATTERN = /^[a-z0-9_\-]+$/i;
 
             const normalizeLegacyTags = (value) => (value || '')
                 .replace(/<b(\s|>)/gi, '<strong$1')
@@ -1237,6 +1908,17 @@
                 return output;
             };
 
+            const sanitizeClassList = (value) => {
+                if (!value || typeof value !== 'string') {
+                    return '';
+                }
+                return value
+                    .split(/\s+/)
+                    .map((token) => token.trim())
+                    .filter((token) => token && CLASS_TOKEN_PATTERN.test(token))
+                    .join(' ');
+            };
+
             const sanitizeHtmlFragment = (html) => {
                 if (!html || typeof html !== 'string') {
                     return '';
@@ -1247,10 +1929,6 @@
                 if (!parsed?.body) {
                     return normalized;
                 }
-                const removeSelector = BLOCKLIST_TAGS.join(',');
-                if (removeSelector) {
-                    parsed.body.querySelectorAll(removeSelector).forEach((node) => node.remove());
-                }
                 const showElementFlag = window.NodeFilter?.SHOW_ELEMENT ?? 1;
                 const walker = parsed.createTreeWalker(parsed.body, showElementFlag, null);
                 const pendingRemoval = [];
@@ -1260,7 +1938,7 @@
                         continue;
                     }
                     const tag = node.tagName?.toLowerCase() ?? '';
-                    if (tag.startsWith('o:') || tag === 'xml') {
+                    if (!tag || BLOCKLIST_TAG_SET.has(tag) || tag.startsWith('o:')) {
                         pendingRemoval.push(node);
                         continue;
                     }
@@ -1269,15 +1947,37 @@
                         if (attrName.startsWith('data-q2-')) {
                             return;
                         }
+                        if (attrName.startsWith('data-')) {
+                            if (SAFE_DATA_ATTR_PATTERN.test(attrName)) {
+                                return;
+                            }
+                            node.removeAttribute(attr.name);
+                            return;
+                        }
+                        if (attrName.startsWith('aria-')) {
+                            return;
+                        }
+                        if (attrName === 'class') {
+                            if (TABLE_STRUCTURE_TAGS.has(tag)) {
+                                const sanitizedClasses = sanitizeClassList(attr.value);
+                                if (sanitizedClasses) {
+                                    node.setAttribute(attr.name, sanitizedClasses);
+                                    return;
+                                }
+                            }
+                            node.removeAttribute(attr.name);
+                            return;
+                        }
                         if (attrName === 'style' || attrName.startsWith('on')) {
                             node.removeAttribute(attr.name);
                             return;
                         }
                         const tagAllowList = TAG_PASTE_ATTRS[tag];
                         if (tagAllowList) {
-                            if (!tagAllowList.has(attrName)) {
-                                node.removeAttribute(attr.name);
+                            if (tagAllowList.has(attrName) || GLOBAL_PASTE_ATTRS.has(attrName)) {
+                                return;
                             }
+                            node.removeAttribute(attr.name);
                             return;
                         }
                         if (!GLOBAL_PASTE_ATTRS.has(attrName)) {
@@ -1319,6 +2019,43 @@
                 return '';
             };
 
+            const htmlToPlainText = (html = '') => {
+                if (!html || typeof html !== 'string') {
+                    return '';
+                }
+                try {
+                    const parser = new DOMParser();
+                    const parsed = parser.parseFromString(html, 'text/html');
+                    return parsed?.body?.textContent?.trim() ?? '';
+                } catch (error) {
+                    return '';
+                }
+            };
+
+            const insertSafeHtmlFragment = (safeHtml) => {
+                if (!safeHtml || !safeHtml.trim().length) {
+                    return false;
+                }
+                const selection = quill.getSelection(true) || { index: quill.getLength(), length: 0 };
+                const docLengthBefore = quill.getLength();
+                tracker.withBatchChange('insert', () => {
+                    if (selection.length) {
+                        quill.deleteText(selection.index, selection.length, userSource);
+                    }
+                    quill.clipboard.dangerouslyPasteHTML(selection.index, safeHtml, userSource);
+                });
+                const docLengthAfter = quill.getLength();
+                const insertedLength = docLengthAfter - (docLengthBefore - selection.length);
+                const caretIndex = selection.index + Math.max(insertedLength, 0);
+                window.requestAnimationFrame(() => {
+                    quill.focus();
+                    quill.setSelection(Math.min(caretIndex, quill.getLength()), 0, silentSource);
+                    refreshChangeTooltips();
+                    decorateTrackedTables();
+                });
+                return true;
+            };
+
             const registerSanitizedPasteHandler = () => {
                 const handlePaste = async (event) => {
                     if (event.clipboardData?.files?.length) {
@@ -1332,26 +2069,9 @@
 
                     event.preventDefault();
                     event.stopPropagation();
-
-                    const selection = quill.getSelection(true) || { index: quill.getLength(), length: 0 };
-                    const docLengthBefore = quill.getLength();
-
-                    tracker.withBatchChange('insert', () => {
-                        if (selection.length) {
-                            quill.deleteText(selection.index, selection.length, userSource);
-                        }
-                        quill.clipboard.dangerouslyPasteHTML(selection.index, safeHtml, userSource);
-                    });
-
-                    const docLengthAfter = quill.getLength();
-                    const insertedLength = docLengthAfter - (docLengthBefore - selection.length);
-                    const caretIndex = selection.index + Math.max(insertedLength, 0);
-
-                    window.requestAnimationFrame(() => {
-                        quill.focus();
-                        quill.setSelection(Math.min(caretIndex, quill.getLength()), 0, silentSource);
-                        refreshChangeTooltips();
-                    });
+                    if (!insertSafeHtmlFragment(safeHtml)) {
+                        setStatus('Paste failed. Please try again.', 'error');
+                    }
                 };
 
                 quill.root.addEventListener('paste', (event) => {
@@ -1360,6 +2080,89 @@
                         setStatus('Paste failed. Please try again.', 'error');
                     });
                 }, { capture: true });
+            };
+
+            const pasteFromClipboard = async (preferPlainText = false) => {
+                const resolveManualPayload = async () => {
+                    if (!pasteModal || !pasteCatcher) {
+                        throw new Error('quill2-manual-paste-unavailable');
+                    }
+                    return captureManualRichPaste();
+                };
+
+                try {
+                    if (preferPlainText) {
+                        let textPayload = navigator.clipboard?.readText ? await readClipboardPlainText() : '';
+                        if (!textPayload || !textPayload.trim().length) {
+                            const manualPayload = await resolveManualPayload();
+                            textPayload = manualPayload.text;
+                            if ((!textPayload || !textPayload.trim().length) && manualPayload.html) {
+                                textPayload = htmlToPlainText(manualPayload.html);
+                            }
+                        }
+                        if (!textPayload || !textPayload.trim().length) {
+                            setStatus('Clipboard does not contain plain text to paste.', 'error');
+                            return;
+                        }
+                        if (insertSafeHtmlFragment(plainTextToHtml(textPayload))) {
+                            setStatus('Pasted as plain text.', 'success');
+                        } else {
+                            setStatus('Paste failed. Please try again.', 'error');
+                        }
+                        return;
+                    }
+
+                    let htmlPayload = navigator.clipboard?.read ? await readClipboardHtml() : '';
+                    let textPayload = navigator.clipboard?.readText ? await readClipboardPlainText() : '';
+                    if ((!htmlPayload || !htmlPayload.trim().length) && (!textPayload || !textPayload.trim().length)) {
+                        const manualPayload = await resolveManualPayload();
+                        htmlPayload = manualPayload.html || '';
+                        textPayload = manualPayload.text || '';
+                    }
+                    if ((!htmlPayload || !htmlPayload.trim().length) && (!textPayload || !textPayload.trim().length)) {
+                        setStatus('Clipboard is empty.', 'error');
+                        return;
+                    }
+                    const safeHtml = composeSafeHtml(htmlPayload, textPayload);
+                    if (!safeHtml) {
+                        setStatus('Clipboard is empty.', 'error');
+                        return;
+                    }
+                    if (insertSafeHtmlFragment(safeHtml)) {
+                        setStatus('Pasted from clipboard.', 'success');
+                    } else {
+                        setStatus('Paste failed. Please try again.', 'error');
+                    }
+                } catch (error) {
+                    if (error?.code === MANUAL_PASTE_CANCELLED || error?.message === MANUAL_PASTE_CANCELLED) {
+                        setStatus('Paste cancelled.', 'muted');
+                        return;
+                    }
+                    console.error('Clipboard read failed', error);
+                    if (preferPlainText) {
+                        setStatus('Clipboard access blocked. Allow permissions and try again.', 'error');
+                        return;
+                    }
+                    try {
+                        const manualPayload = await captureManualRichPaste();
+                        const safeHtml = composeSafeHtml(manualPayload.html, manualPayload.text);
+                        if (!safeHtml) {
+                            setStatus('Clipboard is empty.', 'error');
+                            return;
+                        }
+                        if (insertSafeHtmlFragment(safeHtml)) {
+                            setStatus('Pasted from clipboard.', 'success');
+                        } else {
+                            setStatus('Paste failed. Please try again.', 'error');
+                        }
+                    } catch (manualError) {
+                        if (manualError?.code === MANUAL_PASTE_CANCELLED || manualError?.message === MANUAL_PASTE_CANCELLED) {
+                            setStatus('Paste cancelled.', 'muted');
+                        } else {
+                            setStatus('Clipboard access blocked. Allow permissions and try again.', 'error');
+                        }
+                    }
+                }
             };
 
             const registerSmartTypographyBindings = () => {
@@ -1438,6 +2241,7 @@
             registerSanitizedPasteHandler();
             registerSmartTypographyBindings();
             refreshChangeTooltips();
+            decorateTrackedTables();
 
             saveButton?.addEventListener('click', async () => {
                 if (!saveEndpoint) {
@@ -1458,7 +2262,7 @@
                             changes: snapshot.changes,
                             comments: commentLog,
                             text: snapshot.text,
-                            html: quill.root.innerHTML,
+                            html: serializeEditorHtml(),
                         }),
                     });
                     if (!response.ok) {
@@ -1504,10 +2308,24 @@
             window.quill2Tracker = tracker;
         };
 
+        const startWhenQuillReady = (attempt = 0) => {
+            if (window.Quill) {
+                initQuillLite();
+                return;
+            }
+            if (attempt > 200) {
+                console.error('Quill never became available. Is Vite serving assets?');
+                return;
+            }
+            window.setTimeout(() => startWhenQuillReady(attempt + 1), 50);
+        };
+
+        const bootQuillLite = () => startWhenQuillReady();
+
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initQuillLite, { once: true });
+            document.addEventListener('DOMContentLoaded', bootQuillLite, { once: true });
         } else {
-            initQuillLite();
+            bootQuillLite();
         }
     </script>
 @endpush
@@ -1557,6 +2375,44 @@
             text-decoration-color: #991b1b;
         }
 
+        #quill2-root #quill2-editor table[data-q2-table-change] {
+            position: relative;
+            outline: 2px solid transparent;
+            border-radius: 0.75rem;
+        }
+
+        #quill2-root #quill2-editor table.q2-table-change--insert {
+            outline-color: var(--q2-insert-border, var(--q2-insert-border-default));
+            box-shadow: 0 0 0 2px var(--q2-insert-bg, var(--q2-insert-bg-default));
+        }
+
+        #quill2-root #quill2-editor table.q2-table-change--insert::after,
+        #quill2-root #quill2-editor table.q2-table-change--delete::after {
+            content: attr(data-q2-table-change) ' table';
+            position: absolute;
+            top: -0.85rem;
+            right: 0.5rem;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            padding: 0.15rem 0.55rem;
+            border-radius: 999px;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid currentColor;
+        }
+
+        #quill2-root #quill2-editor table.q2-table-change--delete {
+            outline-color: #fb7185;
+            box-shadow: 0 0 0 2px rgba(251, 113, 133, 0.3);
+        }
+
+        #quill2-root #quill2-editor table.q2-table-change--delete::after {
+            color: #9f1239;
+            border-color: #fda4af;
+        }
+
         #quill2-root #quill2-editor[data-view-mode="clean"] [data-q2-change-type="delete"] {
             display: none;
         }
@@ -1566,6 +2422,22 @@
             box-shadow: none;
             border-bottom: none;
             color: inherit;
+        }
+
+        #quill2-root #quill2-editor[data-view-mode="clean"] table[data-q2-table-change] {
+            position: static;
+            outline: none;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        #quill2-root #quill2-editor[data-view-mode="clean"] table[data-q2-table-change="delete"] {
+            display: none;
+        }
+
+        #quill2-root #quill2-editor[data-view-mode="clean"] table[data-q2-table-change]::after {
+            content: none;
+            display: none;
         }
 
         #quill2-root .quill2-activity-active {
