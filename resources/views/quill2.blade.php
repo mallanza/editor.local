@@ -55,184 +55,193 @@
                 <div id="quill2-shell" class="flex min-h-[400px] w-full flex-row items-stretch">
                     <div id="quill2-editor-pane" class="flex flex-1 flex-col gap-4 border-r border-slate-100 bg-white p-6">
                         <div class="rounded-3xl border border-slate-100 bg-white shadow-sm">
-                            <div id="quill2-toolbar" class="ql-toolbar ql-snow rounded-t-3xl border-b border-slate-100 px-4 py-2">
-                            <span class="ql-formats">
-                                <select class="ql-font">
-                                    <option selected></option>
-                                    <option value="serif"></option>
-                                    <option value="monospace"></option>
-                                </select>
-                                <select class="ql-header">
-                                    <option selected></option>
-                                    <option value="1">H1</option>
-                                    <option value="2">H2</option>
-                                </select>
-                            </span>
-                            <span class="ql-formats">
-                                <button class="ql-script" value="sub" type="button"></button>
-                                <button class="ql-script" value="super" type="button"></button>
-                            </span>
-                            <span class="ql-formats">
-                                <button class="ql-bold" type="button"></button>
-                                <button class="ql-italic" type="button"></button>
-                                <button class="ql-underline" type="button"></button>
-                            </span>
-                            <span class="ql-formats">
-                                <select class="ql-align">
-                                    <option selected></option>
-                                    <option value="center"></option>
-                                    <option value="right"></option>
-                                    <option value="justify"></option>
-                                </select>
-                            </span>
-                            <span class="ql-formats">
-                                <button class="ql-list" value="ordered" type="button"></button>
-                                <button class="ql-list" value="bullet" type="button"></button>
-                            </span>
-                            <span class="ql-formats">
-                                <button class="ql-clean" type="button"></button>
-                            </span>
-                            <span class="ql-formats gap-2">
-                                <button
-                                    type="button"
-                                    id="quill2-paste"
-                                    class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/70 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-700 shadow-sm transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
-                                    title="Paste with formatting"
-                                >
-                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
-                                        <path d="M7 4h6v2h3v11H4V6h3V4Z" stroke-linejoin="round" />
-                                        <path d="M8 1.5h4V4H8z" />
-                                    </svg>
-                                    <span class="sr-only">Paste with formatting</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    id="quill2-paste-text"
-                                    class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/70 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-700 shadow-sm transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
-                                    title="Paste as plain text"
-                                >
-                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
-                                        <path d="M6 3h8v3h3v11H3V6h3V3Z" stroke-linejoin="round" />
-                                        <path d="M7 9h6M7 12h4" stroke-linecap="round" />
-                                    </svg>
-                                    <span class="sr-only">Paste as text</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    id="quill2-insert-image"
-                                    class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/70 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-700 shadow-sm transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
-                                    title="Insert image"
-                                >
-                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
-                                        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h7A2.5 2.5 0 0 1 16 5.5v9A2.5 2.5 0 0 1 13.5 17h-7A2.5 2.5 0 0 1 4 14.5v-9Z" />
-                                        <path d="M7 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" fill="currentColor" stroke="none" />
-                                        <path d="M4.8 14.2l4.2-4.2 2.7 2.7 1.6-1.6 2.7 2.7" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    <span class="sr-only">Insert image</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    id="quill2-print"
-                                    class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/70 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-700 shadow-sm transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
-                                    title="Print"
-                                >
-                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
-                                        <path d="M6 7V3h8v4" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M5 8h10a2 2 0 0 1 2 2v4h-3v3H6v-3H3v-4a2 2 0 0 1 2-2Z" stroke-linejoin="round" />
-                                        <path d="M6 14h8" stroke-linecap="round" />
-                                    </svg>
-                                    <span class="sr-only">Print</span>
-                                </button>
-                            </span>
-                            <span class="ql-formats">
-                                <button class="ql-table-better" aria-label="Insert table" type="button"></button>
-                            </span>
-                            <span class="ql-formats">
-                                <button
-                                    type="button"
-                                    id="quill2-add-comment"
-                                    class="relative inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/60 px-3 py-2 text-slate-900 shadow-sm transition hover:text-sky-500 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:pointer-events-none"
-                                    title="Add comment"
-                                    disabled
-                                >
-                                    <svg class="h-4 w-4 transition-colors" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-                                        <path d="M6 9h8M10 5v8" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M10 1.5C5.31 1.5 1.5 4.86 1.5 9c0 1.69.56 3.21 1.5 4.46V18l3.77-1.88c1.01.24 2.08.38 3.23.38 4.69 0 8.5-3.36 8.5-7.5S14.69 1.5 10 1.5Z" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </button>
-                            </span>
-                            <span class="ql-formats gap-2">
-                                <button
-                                    type="button"
-                                    id="quill2-accept-current"
-                                    class="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-emerald-700 shadow-sm transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:border-emerald-100 disabled:bg-emerald-50 disabled:text-emerald-300 disabled:pointer-events-none"
-                                    title="Accept selected change"
-                                    aria-label="Accept selected change"
-                                    disabled
-                                >
-                                    <svg class="h-4.5 w-4.5" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false">
-                                        <path d="M8 4h8l5 5v13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke-linejoin="round" />
-                                        <path d="M16 4v5h5" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M10 15.5l3 3.5 5-6" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    <span class="sr-only">Accept change</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    id="quill2-reject-current"
-                                    class="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-rose-700 shadow-sm transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:border-rose-100 disabled:bg-rose-50 disabled:text-rose-300 disabled:pointer-events-none"
-                                    title="Decline selected change"
-                                    aria-label="Decline selected change"
-                                    disabled
-                                >
-                                    <svg class="h-4.5 w-4.5" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false">
-                                        <path d="M8 4h8l5 5v13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke-linejoin="round" />
-                                        <path d="M16 4v5h5" stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M11 15l6 6M17 15l-6 6" stroke-linecap="round" />
-                                    </svg>
-                                    <span class="sr-only">Decline change</span>
-                                </button>
-                            </span>
-                            <span class="ql-formats">
-                                <button
-                                    type="button"
-                                    id="quill2-accept-all"
-                                    class="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-700 shadow-sm transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:border-emerald-100 disabled:bg-emerald-50 disabled:text-emerald-300"
-                                    title="Accept all pending changes"
-                                    disabled
-                                >
-                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-                                        <path d="M4 10l4 4 8-8" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    <span class="sr-only">Accept all changes</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    id="quill2-reject-all"
-                                    class="inline-flex items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-3 py-2 text-rose-700 shadow-sm transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:border-rose-100 disabled:bg-rose-50 disabled:text-rose-300"
-                                    title="Decline all pending changes"
-                                    disabled
-                                >
-                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
-                                        <path d="M5 5l10 10M15 5l-10 10" stroke-linecap="round" />
-                                    </svg>
-                                    <span class="sr-only">Decline all changes</span>
-                                </button>
-                            </span>
-                            <span class="ql-formats">
-                                <button
-                                    type="button"
-                                    id="quill2-track-toggle"
-                                    class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-2 text-slate-500 shadow-sm transition hover:bg-slate-50"
-                                    title="Toggle track changes"
-                                    aria-pressed="true"
-                                >
-                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
-                                        <rect x="6" y="6" width="8" height="8" rx="1" fill="#000000" />
-                                    </svg>
-                                    <span class="sr-only">Toggle track changes</span>
-                                </button>
-                            </span>
+                            <div id="quill2-toolbar" class="ql-toolbar ql-snow rounded-t-3xl border-b border-slate-100 px-4 py-2 flex flex-col gap-2">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="ql-formats gap-2">
+                                        <button
+                                            type="button"
+                                            id="quill2-print"
+                                            class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/70 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-700 shadow-sm transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+                                            title="Print"
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
+                                                <path d="M6 7V3h8v4" stroke-linecap="round" stroke-linejoin="round" />
+                                                <path d="M5 8h10a2 2 0 0 1 2 2v4h-3v3H6v-3H3v-4a2 2 0 0 1 2-2Z" stroke-linejoin="round" />
+                                                <path d="M6 14h8" stroke-linecap="round" />
+                                            </svg>
+                                            <span class="sr-only">Print</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            id="quill2-paste"
+                                            class="ml-2 inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/70 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-700 shadow-sm transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+                                            title="Paste with formatting"
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
+                                                <path d="M7 4h6v2h3v11H4V6h3V4Z" stroke-linejoin="round" />
+                                                <path d="M8 1.5h4V4H8z" />
+                                            </svg>
+                                            <span class="sr-only">Paste with formatting</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            id="quill2-paste-text"
+                                            class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/70 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-700 shadow-sm transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+                                            title="Paste as plain text"
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
+                                                <path d="M6 3h8v3h3v11H3V6h3V3Z" stroke-linejoin="round" />
+                                                <path d="M7 9h6M7 12h4" stroke-linecap="round" />
+                                            </svg>
+                                            <span class="sr-only">Paste as text</span>
+                                        </button>
+                                    </span>
+
+                                    <span class="ql-formats">
+                                        <select class="ql-font">
+                                            <option selected></option>
+                                            <option value="serif"></option>
+                                            <option value="monospace"></option>
+                                        </select>
+                                        <select class="ql-header">
+                                            <option selected></option>
+                                            <option value="1">H1</option>
+                                            <option value="2">H2</option>
+                                        </select>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <button class="ql-bold" type="button"></button>
+                                        <button class="ql-italic" type="button"></button>
+                                        <button class="ql-underline" type="button"></button>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <button class="ql-script" value="sub" type="button"></button>
+                                        <button class="ql-script" value="super" type="button"></button>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <button class="ql-list" value="ordered" type="button"></button>
+                                        <button class="ql-list" value="bullet" type="button"></button>
+                                        <select class="ql-align">
+                                            <option selected></option>
+                                            <option value="center"></option>
+                                            <option value="right"></option>
+                                            <option value="justify"></option>
+                                        </select>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <button class="ql-clean" type="button"></button>
+                                    </span>
+                                    <span class="ql-formats inline-flex items-center gap-1">
+                                        <button class="ql-table-better" aria-label="Insert table" type="button"></button>
+                                        <button
+                                            type="button"
+                                            id="quill2-insert-image"
+                                            class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/70 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-700 shadow-sm transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+                                            title="Insert image"
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
+                                                <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h7A2.5 2.5 0 0 1 16 5.5v9A2.5 2.5 0 0 1 13.5 17h-7A2.5 2.5 0 0 1 4 14.5v-9Z" />
+                                                <path d="M7 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" fill="currentColor" stroke="none" />
+                                                <path d="M4.8 14.2l4.2-4.2 2.7 2.7 1.6-1.6 2.7 2.7" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                            <span class="sr-only">Insert image</span>
+                                        </button>
+                                    </span>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="ql-formats">
+                                        <button
+                                            type="button"
+                                            id="quill2-track-toggle"
+                                            class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-2 text-slate-500 shadow-sm transition hover:bg-slate-50"
+                                            title="Toggle track changes"
+                                            aria-pressed="true"
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+                                                <rect x="6" y="6" width="8" height="8" rx="1" fill="#000000" />
+                                            </svg>
+                                            <span class="sr-only">Toggle track changes</span>
+                                        </button>
+                                    </span>
+
+                                    <span class="ql-formats">
+                                        <button
+                                            type="button"
+                                            id="quill2-accept-all"
+                                            class="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-700 shadow-sm transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:border-emerald-100 disabled:bg-emerald-50 disabled:text-emerald-300"
+                                            title="Accept all pending changes"
+                                            disabled
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false">
+                                                <path d="M8 4h8l5 5v13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke-linejoin="round" />
+                                                <path d="M16 4v5h5" stroke-linecap="round" stroke-linejoin="round" />
+                                                <path d="M10 15.5l3 3.5 5-6" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                            <span class="sr-only">Accept all changes</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            id="quill2-reject-all"
+                                            class="inline-flex items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-3 py-2 text-rose-700 shadow-sm transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:border-rose-100 disabled:bg-rose-50 disabled:text-rose-300"
+                                            title="Decline all pending changes"
+                                            disabled
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false">
+                                                <path d="M8 4h8l5 5v13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke-linejoin="round" />
+                                                <path d="M16 4v5h5" stroke-linecap="round" stroke-linejoin="round" />
+                                                <path d="M11 15l6 6M17 15l-6 6" stroke-linecap="round" />
+                                            </svg>
+                                            <span class="sr-only">Decline all changes</span>
+                                        </button>
+                                    </span>
+
+                                    <span class="ql-formats gap-2">
+                                        <button
+                                            type="button"
+                                            id="quill2-accept-current"
+                                            class="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-emerald-700 shadow-sm transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:border-emerald-100 disabled:bg-emerald-50 disabled:text-emerald-300 disabled:pointer-events-none"
+                                            title="Accept selected change"
+                                            aria-label="Accept selected change"
+                                            disabled
+                                        >
+                                            <svg class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false">
+                                                <path d="M4 10l4 4 8-8" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                            <span class="sr-only">Accept change</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            id="quill2-reject-current"
+                                            class="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-rose-700 shadow-sm transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:border-rose-100 disabled:bg-rose-50 disabled:text-rose-300 disabled:pointer-events-none"
+                                            title="Decline selected change"
+                                            aria-label="Decline selected change"
+                                            disabled
+                                        >
+                                            <svg class="h-4.5 w-4.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false">
+                                                <path d="M5 5l10 10M15 5l-10 10" stroke-linecap="round" />
+                                            </svg>
+                                            <span class="sr-only">Decline change</span>
+                                        </button>
+                                    </span>
+
+                                    <span class="h-6 w-px bg-slate-200" aria-hidden="true"></span>
+
+                                    <span class="ql-formats">
+                                        <button
+                                            type="button"
+                                            id="quill2-add-comment"
+                                            class="relative inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/60 px-3 py-2 text-slate-900 shadow-sm transition hover:text-sky-500 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:pointer-events-none"
+                                            title="Add comment"
+                                            disabled
+                                        >
+                                            <svg class="h-4 w-4 transition-colors" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+                                                <path d="M6 9h8M10 5v8" stroke-linecap="round" stroke-linejoin="round" />
+                                                <path d="M10 1.5C5.31 1.5 1.5 4.86 1.5 9c0 1.69.56 3.21 1.5 4.46V18l3.77-1.88c1.01.24 2.08.38 3.23.38 4.69 0 8.5-3.36 8.5-7.5S14.69 1.5 10 1.5Z" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </div>
                             </div>
                             <div id="quill2-editor" class="ql-container ql-snow min-h-[360px] rounded-b-3xl px-4 py-4"></div>
                         </div>
@@ -1123,6 +1132,42 @@
                 let cropper = null;
                 let lastInsertIndex = null;
 
+                const openImageModalWithFile = (file, insertIndex) => {
+                    if (!file) {
+                        return;
+                    }
+                    if (typeof insertIndex === 'number' && Number.isFinite(insertIndex)) {
+                        lastInsertIndex = insertIndex;
+                    } else {
+                        const sel = quill.getSelection();
+                        if (sel && typeof sel.index === 'number') {
+                            lastInsertIndex = sel.index;
+                        } else {
+                            lastInsertIndex = Math.max(0, quill.getLength() - 1);
+                        }
+                    }
+
+                    imageInsert.disabled = true;
+                    if (imageFilename) imageFilename.textContent = file.name || '';
+                    cropTarget.removeAttribute('src');
+
+                    if (cropper) {
+                        cropper.destroy();
+                        cropper = null;
+                    }
+
+                    // Lazy-load CropperJS as soon as the modal opens.
+                    loadCropperJs().catch(() => {
+                        // We'll show an alert when trying to instantiate cropper.
+                    });
+
+                    imageModal.classList.remove('hidden');
+                    imageModal.classList.add('flex');
+
+                    // Kick off file hydration (will enable the Insert button once cropper is ready).
+                    setImageFile(file);
+                };
+
                 const openImageModal = () => {
                     const sel = quill.getSelection();
                     if (sel && typeof sel.index === 'number') {
@@ -1285,6 +1330,17 @@
                         imageInsert.disabled = false;
                     }
                 });
+
+                // Expose for paste handler without adding new UI.
+                try {
+                    if (typeof window !== 'undefined') {
+                        window.quill2Debug = window.quill2Debug || {};
+                        window.quill2Debug.openImageModalWithFile = openImageModalWithFile;
+                        window.quill2Debug.uploadBlobAsImage = uploadBlobAsImage;
+                    }
+                } catch (error) {
+                    // ignore
+                }
 
                 // --- In-editor resize handle (bottom-right, preserves aspect ratio) ---
                 const container = quill.root?.parentElement; // .ql-container
@@ -3271,14 +3327,143 @@
                 if (!safeHtml || !safeHtml.trim().length) {
                     return false;
                 }
+
                 const selection = quill.getSelection(true) || { index: quill.getLength(), length: 0 };
-                const docLengthBefore = quill.getLength();
-                tracker.withBatchChange('insert', () => {
-                    if (selection.length) {
-                        quill.deleteText(selection.index, selection.length, userSource);
+
+                // In track-changes mode, rich/multi-block paste can arrive as several internal ops.
+                // To avoid partially tracked / partially committed results, we insert as a single
+                // decorated Delta (already carrying q2-change attrs) and bypass the tracker's
+                // per-op insert interception.
+                if (isTrackingEnabled) {
+                    const Delta = window.Quill.import('delta');
+                    const timestamp = new Date().toISOString();
+                    const changeId = tracker._generateId ? tracker._generateId() : (window.crypto?.randomUUID ? window.crypto.randomUUID() : `q2-${Date.now()}`);
+                    const attrs = tracker._composeAttrs
+                        ? tracker._composeAttrs({ id: changeId, type: 'insert', status: 'pending', timestamp })
+                        : {
+                            [tracker.attrNames.id]: changeId,
+                            [tracker.attrNames.type]: 'insert',
+                            [tracker.attrNames.status]: 'pending',
+                            [tracker.attrNames.userId]: tracker.options.user?.id ?? 'guest-user',
+                            [tracker.attrNames.userName]: tracker.options.user?.name ?? 'Guest User',
+                            [tracker.attrNames.userEmail]: tracker.options.user?.email ?? '',
+                            [tracker.attrNames.timestamp]: timestamp,
+                        };
+
+                    // Step 1: tracked delete selection (if any).
+                    const startIndex = Math.max(0, Number(selection.index) || 0);
+                    const deleteLength = Math.max(0, Number(selection.length) || 0);
+                    if (deleteLength > 0) {
+                        tracker.withBatchChange('delete', () => {
+                            quill.deleteText(startIndex, deleteLength, userSource);
+                        });
                     }
-                    quill.clipboard.dangerouslyPasteHTML(selection.index, safeHtml, userSource);
-                });
+
+                    // Insert after the delete span so replacement reads: deleted(old) then inserted(new).
+                    const insertAt = deleteLength > 0 ? startIndex + deleteLength : startIndex;
+
+                    // Step 2: convert HTML -> Delta and decorate inserted text ops.
+                    let converted = null;
+                    try {
+                        converted = quill.clipboard.convert({ html: safeHtml });
+                    } catch (error) {
+                        try {
+                            converted = quill.clipboard.convert(safeHtml);
+                        } catch (innerError) {
+                            converted = null;
+                        }
+                    }
+                    if (!converted || !Array.isArray(converted.ops) || !converted.ops.length) {
+                        return false;
+                    }
+
+                    const hasStructuredAttrs = (opAttrs) => {
+                        if (!opAttrs) {
+                            return false;
+                        }
+                        return Object.keys(opAttrs).some((name) => {
+                            const key = String(name || '');
+                            return /^(table|ql-table|list|header|blockquote)/i.test(key) || key.toLowerCase().includes('table-');
+                        });
+                    };
+
+                    const decorated = new Delta();
+                    const embedOffsetsToFormat = [];
+                    let localOffset = 0;
+                    (converted.ops || []).forEach((op) => {
+                        if (!Object.prototype.hasOwnProperty.call(op || {}, 'insert')) {
+                            return;
+                        }
+                        const inserted = op.insert;
+                        const opAttrs = op.attributes ? { ...op.attributes } : {};
+                        // Never carry an existing q2-change from clipboard content.
+                        if (Object.prototype.hasOwnProperty.call(opAttrs, changeFormatKey)) {
+                            delete opAttrs[changeFormatKey];
+                        }
+
+                        if (typeof inserted === 'string') {
+                            // Avoid tagging purely structural newlines (notably table/newline structures).
+                            const isPureNewline = inserted === '\n';
+                            const shouldSkip = isPureNewline && hasStructuredAttrs(opAttrs);
+                            if (shouldSkip) {
+                                decorated.insert(inserted, opAttrs);
+                            } else {
+                                decorated.insert(inserted, { ...opAttrs, [changeFormatKey]: attrs });
+                            }
+                            localOffset += inserted.length;
+                            return;
+                        }
+
+                        // For embeds (images), insert them with their attrs then apply q2-change via formatText.
+                        decorated.insert(inserted, opAttrs);
+                        embedOffsetsToFormat.push(localOffset);
+                        localOffset += 1;
+                    });
+
+                    const insertionDelta = new Delta().retain(insertAt).concat(decorated);
+                    quill.updateContents(insertionDelta, silentSource);
+
+                    if (embedOffsetsToFormat.length) {
+                        embedOffsetsToFormat.forEach((offset) => {
+                            try {
+                                quill.formatText(insertAt + offset, 1, { [changeFormatKey]: attrs }, silentSource);
+                            } catch (error) {
+                                // best-effort
+                            }
+                        });
+                    }
+
+                    const insertedLength = tracker._measureDeltaLength ? tracker._measureDeltaLength(decorated) : localOffset;
+                    const preview = tracker._previewFromDelta ? tracker._previewFromDelta(decorated) : '';
+                    const record = {
+                        id: changeId,
+                        type: 'insert',
+                        status: 'pending',
+                        preview,
+                        createdAt: timestamp,
+                        updatedAt: timestamp,
+                        length: insertedLength,
+                        user: { ...(tracker.options.user || {}) },
+                    };
+                    if (typeof tracker._upsertChange === 'function') {
+                        tracker._upsertChange(record, 'paste-insert');
+                    }
+
+                    const caretIndex = insertAt + Math.max(0, insertedLength);
+                    window.requestAnimationFrame(() => {
+                        quill.focus();
+                        quill.setSelection(Math.min(caretIndex, quill.getLength()), 0, silentSource);
+                        scheduleDecorations();
+                    });
+                    return true;
+                }
+
+                // Non-tracking mode: let Quill handle paste normally.
+                const docLengthBefore = quill.getLength();
+                if (selection.length) {
+                    quill.deleteText(selection.index, selection.length, userSource);
+                }
+                quill.clipboard.dangerouslyPasteHTML(selection.index, safeHtml, userSource);
                 const docLengthAfter = quill.getLength();
                 const insertedLength = docLengthAfter - (docLengthBefore - selection.length);
                 const caretIndex = selection.index + Math.max(insertedLength, 0);
@@ -3291,8 +3476,235 @@
             };
 
             const registerSanitizedPasteHandler = () => {
+                const looksLikeImageFile = (file) => {
+                    if (!file) {
+                        return false;
+                    }
+                    const type = String(file.type || '').toLowerCase();
+                    if (type.startsWith('image/')) {
+                        return true;
+                    }
+                    const name = String(file.name || '').toLowerCase();
+                    if (!type && name && /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(name)) {
+                        return true;
+                    }
+                    return false;
+                };
+
+                const getPastedImageFiles = (clipboardData) => {
+                    if (!clipboardData) {
+                        return [];
+                    }
+                    const items = clipboardData.items ? Array.from(clipboardData.items) : [];
+                    const found = [];
+                    for (let i = 0; i < items.length; i += 1) {
+                        const item = items[i];
+                        if (!item || item.kind !== 'file') {
+                            continue;
+                        }
+                        const file = item.getAsFile ? item.getAsFile() : null;
+                        const itemType = String(item.type || '').toLowerCase();
+                        if ((itemType && itemType.startsWith('image/')) || looksLikeImageFile(file)) {
+                            if (file) {
+                                found.push(file);
+                            }
+                        }
+                    }
+
+                    const files = clipboardData.files ? Array.from(clipboardData.files) : [];
+                    files.forEach((file) => {
+                        if (looksLikeImageFile(file)) {
+                            found.push(file);
+                        }
+                    });
+
+                    // De-dupe (some browsers expose the same blob via items + files).
+                    const uniq = [];
+                    const seen = new Set();
+                    found.forEach((file) => {
+                        const key = `${file.name || ''}:${file.size || 0}:${file.type || ''}`;
+                        if (seen.has(key)) {
+                            return;
+                        }
+                        seen.add(key);
+                        uniq.push(file);
+                    });
+                    return uniq;
+                };
+
+                const buildHtmlForUploadedImages = (urls) => {
+                    const safeUrls = Array.isArray(urls) ? urls.filter(Boolean) : [];
+                    if (!safeUrls.length) {
+                        return '';
+                    }
+                    return safeUrls.map((url) => `<p><img src="${encodeContent(url)}" /></p>`).join('') || '';
+                };
+
+                const replaceImageSrcsInHtml = (html, uploadedUrls) => {
+                    if (!html || typeof html !== 'string') {
+                        return html || '';
+                    }
+                    const urls = Array.isArray(uploadedUrls) ? uploadedUrls.filter(Boolean) : [];
+                    if (!urls.length) {
+                        return html;
+                    }
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const imgs = Array.from(doc.querySelectorAll('img'));
+                    if (!imgs.length) {
+                        // No <img> tags to replace; append at end.
+                        const wrapper = doc.body || doc.documentElement;
+                        urls.forEach((url) => {
+                            const p = doc.createElement('p');
+                            const img = doc.createElement('img');
+                            img.setAttribute('src', url);
+                            p.appendChild(img);
+                            wrapper.appendChild(p);
+                        });
+                        return doc.body?.innerHTML || html;
+                    }
+
+                    const needsReplacement = (src) => {
+                        const value = String(src || '').trim().toLowerCase();
+                        if (!value) {
+                            return true;
+                        }
+                        if (value.startsWith('data:')) {
+                            return true;
+                        }
+                        if (value.startsWith('blob:')) {
+                            return true;
+                        }
+                        if (value.startsWith('file:')) {
+                            return true;
+                        }
+                        if (value.startsWith('cid:')) {
+                            return true;
+                        }
+                        return false;
+                    };
+
+                    let urlIndex = 0;
+                    imgs.forEach((img) => {
+                        if (urlIndex >= urls.length) {
+                            return;
+                        }
+                        const src = img.getAttribute('src');
+                        if (!needsReplacement(src)) {
+                            return;
+                        }
+                        img.setAttribute('src', urls[urlIndex]);
+                        urlIndex += 1;
+                    });
+
+                    // If there are more urls than replaceable <img>, append the rest.
+                    if (urlIndex < urls.length) {
+                        const wrapper = doc.body || doc.documentElement;
+                        for (let i = urlIndex; i < urls.length; i += 1) {
+                            const p = doc.createElement('p');
+                            const img = doc.createElement('img');
+                            img.setAttribute('src', urls[i]);
+                            p.appendChild(img);
+                            wrapper.appendChild(p);
+                        }
+                    }
+
+                    return doc.body?.innerHTML || html;
+                };
+
                 const handlePaste = async (event) => {
+                    const imageFiles = getPastedImageFiles(event.clipboardData);
+                    const directPayload = getClipboardPayload(event);
+                    const hasTextPayload = Boolean(directPayload?.html || directPayload?.text);
+
+                    // Case A: single-image paste (image-only) => keep current behavior (crop modal).
+                    if (imageFiles.length === 1 && !hasTextPayload) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        const selection = quill.getSelection(true) || { index: quill.getLength(), length: 0 };
+                        const startIndex = Math.max(0, Number(selection.index) || 0);
+                        const selectionLength = Math.max(0, Number(selection.length) || 0);
+                        let insertAt = startIndex;
+                        if (selectionLength > 0) {
+                            if (isTrackingEnabled) {
+                                tracker.withBatchChange('delete', () => {
+                                    quill.deleteText(startIndex, selectionLength, userSource);
+                                });
+                                insertAt = startIndex + selectionLength;
+                            } else {
+                                quill.deleteText(startIndex, selectionLength, userSource);
+                                insertAt = startIndex;
+                            }
+                        }
+                        const opener = window.quill2Debug?.openImageModalWithFile;
+                        if (typeof opener === 'function') {
+                            opener(imageFiles[0], insertAt);
+                        } else {
+                            setStatus('Image paste is unavailable. Use Insert Image instead.', 'error');
+                        }
+                        return;
+                    }
+
+                    // Case B: mixed paste (text/html + one or more images) OR multi-image paste.
+                    // Auto-upload images (no per-image crop modal) and paste the full content.
+                    if (imageFiles.length > 0) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        const selectionSnapshot = quill.getSelection(true) || { index: quill.getLength(), length: 0 };
+
+                        const uploader = window.quill2Debug?.uploadBlobAsImage;
+                        if (typeof uploader !== 'function') {
+                            setStatus('Image paste is unavailable. Use Insert Image instead.', 'error');
+                            return;
+                        }
+
+                        setStatus(`Uploading ${imageFiles.length} pasted image${imageFiles.length === 1 ? '' : 's'}...`, 'muted');
+                        const uploadedUrls = [];
+                        for (let i = 0; i < imageFiles.length; i += 1) {
+                            try {
+                                // Server-side validation + re-encode will enforce safety.
+                                const url = await uploader(imageFiles[i]);
+                                if (url) {
+                                    uploadedUrls.push(url);
+                                }
+                            } catch (error) {
+                                console.error('Pasted image upload failed', error);
+                            }
+                        }
+                        if (!uploadedUrls.length) {
+                            setStatus('Image upload failed. Please try again.', 'error');
+                            return;
+                        }
+
+                        // Build/patch HTML to include uploaded image URLs.
+                        const payload = hasTextPayload ? directPayload : await resolveClipboardPayload(event);
+                        const safeHtml = composeSafeHtml(payload.html, payload.text);
+                        const htmlWithImages = safeHtml && safeHtml.trim().length
+                            ? replaceImageSrcsInHtml(safeHtml, uploadedUrls)
+                            : buildHtmlForUploadedImages(uploadedUrls);
+
+                        // Restore the original paste target and use the existing insertion pipeline
+                        // (which handles track-changes decoration consistently).
+                        try {
+                            quill.setSelection(
+                                Math.max(0, Number(selectionSnapshot.index) || 0),
+                                Math.max(0, Number(selectionSnapshot.length) || 0),
+                                silentSource
+                            );
+                        } catch (error) {
+                            // ignore
+                        }
+
+                        if (insertSafeHtmlFragment(htmlWithImages)) {
+                            setStatus('Pasted from clipboard.', 'success');
+                        } else {
+                            setStatus('Paste failed. Please try again.', 'error');
+                        }
+                        return;
+                    }
+
                     if (event.clipboardData?.files?.length) {
+                        // Non-image files: let the browser/Quill decide.
                         return;
                     }
                     const payload = await resolveClipboardPayload(event);

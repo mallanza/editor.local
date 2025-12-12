@@ -326,6 +326,49 @@
             this._upsertChange(change, 'insert');
         }
 
+        _applyChangeFormat(index, length, attrs) {
+            if (!Number.isFinite(index) || !Number.isFinite(length) || length <= 0) {
+                return false;
+            }
+
+            // Prefer a retain-based delta format application.
+            // This is notably more reliable than a single formatText() call for multi-block
+            // paste operations (e.g. HTML -> multiple paragraphs/headers), where formatText
+            // can be inconsistent across line boundaries in some Quill builds.
+            try {
+                const payload = new this.Delta().retain(index).retain(length, { [this._blotName]: attrs });
+                this.quill.updateContents(payload, this.QuillRef.sources.SILENT);
+                return true;
+            } catch (error) {
+                // fall through
+            }
+
+            try {
+                this.quill.formatText(index, length, { [this._blotName]: attrs }, this.QuillRef.sources.SILENT);
+                return true;
+            } catch (error) {
+                // fall through
+            }
+
+            // Last resort: apply in smaller chunks.
+            // This is slower, but keeps the editor from ending up partially tracked.
+            const chunkSize = 256;
+            for (let offset = 0; offset < length; offset += chunkSize) {
+                const chunkLen = Math.min(chunkSize, length - offset);
+                try {
+                    const payload = new this.Delta().retain(index + offset).retain(chunkLen, { [this._blotName]: attrs });
+                    this.quill.updateContents(payload, this.QuillRef.sources.SILENT);
+                } catch (error) {
+                    try {
+                        this.quill.formatText(index + offset, chunkLen, { [this._blotName]: attrs }, this.QuillRef.sources.SILENT);
+                    } catch (innerError) {
+                        // give up on this chunk
+                    }
+                }
+            }
+            return true;
+        }
+
         _processInsert(index, text) {
             if (!text) {
                 return;
@@ -343,7 +386,8 @@
                 status: 'pending',
                 timestamp: changeTimestamp,
             });
-            this.quill.formatText(index, length, { [this._blotName]: attrs }, this.QuillRef.sources.SILENT);
+
+            this._applyChangeFormat(index, length, attrs);
             const fragment = this._stringPreview(text);
             if (continuingChange) {
                 continuingChange.length += length;

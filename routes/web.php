@@ -5,9 +5,6 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\MceDocumentController;
-use App\Http\Controllers\QuillChangeController;
-use App\Http\Controllers\QuillCommentController;
-use App\Http\Controllers\QuillPoCController;
 use App\Http\Controllers\QuillLiteController;
 use App\Http\Controllers\ImageUploadController;
 
@@ -21,17 +18,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    Route::get('/quill', [QuillPoCController::class, 'show'])->name('quill.show');
-    Route::post('/quill/save', [QuillPoCController::class, 'save'])->name('quill.save');
-
-    Route::get('/quill/comments', [QuillCommentController::class, 'index'])->name('quill.comments.index');
-    Route::post('/quill/comments', [QuillCommentController::class, 'store'])->name('quill.comments.store');
-    Route::patch('/quill/comments/{quillComment}', [QuillCommentController::class, 'update'])->name('quill.comments.update');
-
-    Route::post('/quill/changes', [QuillChangeController::class, 'store'])->name('quill.changes.store');
-    Route::post('/quill/changes/{change_uuid}/accept', [QuillChangeController::class, 'accept'])->name('quill.changes.accept');
-    Route::post('/quill/changes/{change_uuid}/reject', [QuillChangeController::class, 'reject'])->name('quill.changes.reject');
 });
 
 
