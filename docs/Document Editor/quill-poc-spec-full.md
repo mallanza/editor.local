@@ -25,6 +25,7 @@ The PoC must provide the following capabilities:
 - Autosave is intentionally excluded from the PoC.
 
 ## Commenting System
+- Commenting system will be improved!
 - User selects text and chooses **Add Comment**.
 - A modal or panel appears to enter comment text.
 - Each comment is anchored using the Quill selection index and length.

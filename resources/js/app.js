@@ -5,6 +5,10 @@ import Quill from 'quill';
 import QuillTableBetter from 'quill-table-better';
 import 'quill-table-better/dist/quill-table-better.css';
 
+// Load the Quill redline tracker once via Vite.
+// This script attaches itself to window.QuillLiteChangeTracker.
+import '../../public/js/quill-lite-change-tracker.js';
+
 window.Alpine = Alpine;
 if (typeof window !== 'undefined') {
 	window.Quill = window.Quill || Quill;

@@ -57,6 +57,11 @@
                         <div class="rounded-3xl border border-slate-100 bg-white shadow-sm">
                             <div id="quill2-toolbar" class="ql-toolbar ql-snow rounded-t-3xl border-b border-slate-100 px-4 py-2">
                             <span class="ql-formats">
+                                <select class="ql-font">
+                                    <option selected></option>
+                                    <option value="serif"></option>
+                                    <option value="monospace"></option>
+                                </select>
                                 <select class="ql-header">
                                     <option selected></option>
                                     <option value="1">H1</option>
@@ -64,9 +69,21 @@
                                 </select>
                             </span>
                             <span class="ql-formats">
+                                <button class="ql-script" value="sub" type="button"></button>
+                                <button class="ql-script" value="super" type="button"></button>
+                            </span>
+                            <span class="ql-formats">
                                 <button class="ql-bold" type="button"></button>
                                 <button class="ql-italic" type="button"></button>
                                 <button class="ql-underline" type="button"></button>
+                            </span>
+                            <span class="ql-formats">
+                                <select class="ql-align">
+                                    <option selected></option>
+                                    <option value="center"></option>
+                                    <option value="right"></option>
+                                    <option value="justify"></option>
+                                </select>
                             </span>
                             <span class="ql-formats">
                                 <button class="ql-list" value="ordered" type="button"></button>
@@ -99,6 +116,32 @@
                                         <path d="M7 9h6M7 12h4" stroke-linecap="round" />
                                     </svg>
                                     <span class="sr-only">Paste as text</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    id="quill2-insert-image"
+                                    class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/70 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-700 shadow-sm transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+                                    title="Insert image"
+                                >
+                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
+                                        <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h7A2.5 2.5 0 0 1 16 5.5v9A2.5 2.5 0 0 1 13.5 17h-7A2.5 2.5 0 0 1 4 14.5v-9Z" />
+                                        <path d="M7 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" fill="currentColor" stroke="none" />
+                                        <path d="M4.8 14.2l4.2-4.2 2.7 2.7 1.6-1.6 2.7 2.7" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span class="sr-only">Insert image</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    id="quill2-print"
+                                    class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/70 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-700 shadow-sm transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+                                    title="Print"
+                                >
+                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false">
+                                        <path d="M6 7V3h8v4" stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M5 8h10a2 2 0 0 1 2 2v4h-3v3H6v-3H3v-4a2 2 0 0 1 2-2Z" stroke-linejoin="round" />
+                                        <path d="M6 14h8" stroke-linecap="round" />
+                                    </svg>
+                                    <span class="sr-only">Print</span>
                                 </button>
                             </span>
                             <span class="ql-formats">
@@ -174,6 +217,20 @@
                                         <path d="M5 5l10 10M15 5l-10 10" stroke-linecap="round" />
                                     </svg>
                                     <span class="sr-only">Decline all changes</span>
+                                </button>
+                            </span>
+                            <span class="ql-formats">
+                                <button
+                                    type="button"
+                                    id="quill2-track-toggle"
+                                    class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-2 text-slate-500 shadow-sm transition hover:bg-slate-50"
+                                    title="Toggle track changes"
+                                    aria-pressed="true"
+                                >
+                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+                                        <rect x="6" y="6" width="8" height="8" rx="1" fill="#000000" />
+                                    </svg>
+                                    <span class="sr-only">Toggle track changes</span>
                                 </button>
                             </span>
                             </div>
@@ -362,11 +419,137 @@
             </div>
         </div>
 
+        <div
+            id="quill2-image-modal"
+            class="fixed inset-0 z-40 hidden items-center justify-center bg-slate-900/40 px-3 py-6 backdrop-blur"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="quill2-image-title"
+        >
+            <div class="w-full max-w-3xl rounded-2xl bg-white shadow-2xl ring-1 ring-black/10">
+                <div class="flex flex-col gap-4 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-[0.6rem] font-semibold uppercase tracking-[0.4em] text-slate-400">Image</p>
+                            <h2 id="quill2-image-title" class="text-lg font-semibold text-slate-900">Insert image</h2>
+                        </div>
+                        <button
+                            type="button"
+                            id="quill2-image-close"
+                            class="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                            aria-label="Close"
+                        >
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" stroke="currentColor" fill="none" stroke-width="1.8">
+                                <path d="M5 5l10 10M15 5l-10 10" stroke-linecap="round" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                        <div class="lg:col-span-1">
+                            <div
+                                id="quill2-image-dropzone"
+                                class="flex min-h-[220px] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-4 text-center text-sm text-slate-600"
+                            >
+                                <p class="text-xs text-slate-500">Drag & drop an image here</p>
+                                <p class="text-xs text-slate-500">or</p>
+                                <label
+                                    class="inline-flex cursor-pointer items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-700 transition hover:bg-slate-50"
+                                >
+                                    Browse
+                                    <input id="quill2-image-input" type="file" accept="image/*" class="sr-only" />
+                                </label>
+                                <p id="quill2-image-filename" class="text-xs text-slate-500"></p>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-2">
+                            <div class="min-h-[260px] rounded-2xl border border-slate-100 bg-white p-3">
+                                <div class="flex min-h-[240px] items-center justify-center">
+                                    <img id="quill2-image-crop-target" alt="Crop preview" class="max-h-[420px] max-w-full" />
+                                </div>
+                            </div>
+                            <p class="mt-2 text-xs text-slate-500">Crop, then insert into the editor.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                        <button
+                            type="button"
+                            id="quill2-image-cancel"
+                            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:bg-slate-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            id="quill2-image-insert"
+                            class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-slate-800"
+                            disabled
+                        >
+                            Insert
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div
+            id="quill2-print-modal"
+            class="fixed inset-0 z-40 hidden items-center justify-center bg-slate-900/40 px-3 py-6 backdrop-blur"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="quill2-print-title"
+        >
+            <div class="w-full max-w-5xl rounded-2xl bg-white shadow-2xl ring-1 ring-black/10">
+                <div class="flex flex-col gap-4 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-[0.6rem] font-semibold uppercase tracking-[0.4em] text-slate-400">Print</p>
+                            <h2 id="quill2-print-title" class="text-lg font-semibold text-slate-900">Print preview</h2>
+                        </div>
+                        <button
+                            type="button"
+                            id="quill2-print-close"
+                            class="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                            aria-label="Close"
+                        >
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" stroke="currentColor" fill="none" stroke-width="1.8">
+                                <path d="M5 5l10 10M15 5l-10 10" stroke-linecap="round" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <iframe
+                        id="quill2-print-frame"
+                        title="Print preview"
+                        class="h-[70vh] w-full rounded-2xl border border-slate-200 bg-white"
+                    ></iframe>
+
+                    <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                        <button
+                            type="button"
+                            id="quill2-print-cancel"
+                            class="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:bg-slate-50"
+                        >
+                            Close
+                        </button>
+                        <button
+                            type="button"
+                            id="quill2-print-action"
+                            class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-slate-800"
+                        >
+                            Print
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/quill-lite-change-tracker.js') }}"></script>
     <script>
         const MAX_QUILL_INIT_ATTEMPTS = 80;
         const TABLE_BETTER_READY_EVENT = 'quill-table-better:ready';
@@ -435,8 +618,191 @@
                         }
             const saveEndpoint = @json(route('quill2.save'));
             const deleteEndpoint = @json(route('quill2.destroy'));
+            const imageUploadEndpoint = @json(route('images.upload'));
             const currentUser = @json($quillUser ?? ['id' => 'guest-user', 'name' => 'Guest User']);
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+            if (typeof window !== 'undefined' && window.Quill && !window.__quill2FormatsRegistered) {
+                try {
+                    const Font = window.Quill.import('formats/font');
+                    if (Font?.whitelist) {
+                        Font.whitelist = ['serif', 'monospace'];
+                        window.Quill.register(Font, true);
+                    }
+                } catch (error) {
+                    console.warn('Unable to register Quill font whitelist', error);
+                }
+                window.__quill2FormatsRegistered = true;
+            }
+
+            if (typeof window !== 'undefined' && window.Quill && !window.__quill2ImageFormatsRegistered) {
+                try {
+                    const BaseImage = window.Quill.import('formats/image');
+
+                    class Q2Image extends BaseImage {
+                        static create(value) {
+                            const node = super.create(typeof value === 'string' ? value : (value?.src || ''));
+                            const width = value && typeof value === 'object' ? (value['q2-img-w'] || value.width) : null;
+                            const height = value && typeof value === 'object' ? (value['q2-img-h'] || value.height) : null;
+                            const align = value && typeof value === 'object' ? (value['q2-img-align'] || value.align) : null;
+
+                            if (width) {
+                                node.setAttribute('data-q2-img-w', String(width));
+                                node.style.width = String(width);
+                            }
+                            if (height) {
+                                node.setAttribute('data-q2-img-h', String(height));
+                                node.style.height = String(height);
+                            }
+                            if (align) {
+                                node.setAttribute('data-q2-img-align', String(align));
+                            }
+                            if (align) {
+                                node.style.display = 'block';
+                                if (String(align) === 'center') {
+                                    node.style.marginLeft = 'auto';
+                                    node.style.marginRight = 'auto';
+                                } else if (String(align) === 'right') {
+                                    node.style.marginLeft = 'auto';
+                                    node.style.marginRight = '0';
+                                } else {
+                                    node.style.marginLeft = '0';
+                                    node.style.marginRight = 'auto';
+                                }
+                            }
+                            return node;
+                        }
+
+                        static formats(node) {
+                            const w = node.getAttribute('data-q2-img-w') || node.style.width || null;
+                            const h = node.getAttribute('data-q2-img-h') || node.style.height || null;
+                            const a = node.getAttribute('data-q2-img-align') || null;
+                            const out = {};
+                            if (w) out['q2-img-w'] = w;
+                            if (h) out['q2-img-h'] = h;
+                            if (a) out['q2-img-align'] = a;
+
+                            const changeId = node.getAttribute('data-q2-change-id');
+                            if (changeId) {
+                                out['q2-change'] = {
+                                    'data-q2-change-id': changeId,
+                                    'data-q2-change-type': node.getAttribute('data-q2-change-type') || '',
+                                    'data-q2-change-status': node.getAttribute('data-q2-change-status') || '',
+                                    'data-q2-user-id': node.getAttribute('data-q2-user-id') || '',
+                                    'data-q2-user-name': node.getAttribute('data-q2-user-name') || '',
+                                    'data-q2-user-email': node.getAttribute('data-q2-user-email') || '',
+                                    'data-q2-timestamp': node.getAttribute('data-q2-timestamp') || '',
+                                };
+                            }
+                            return out;
+                        }
+
+                        format(name, value) {
+                            if (name === 'q2-change') {
+                                const keys = [
+                                    'data-q2-change-id',
+                                    'data-q2-change-type',
+                                    'data-q2-change-status',
+                                    'data-q2-user-id',
+                                    'data-q2-user-name',
+                                    'data-q2-user-email',
+                                    'data-q2-timestamp',
+                                ];
+                                if (!value) {
+                                    keys.forEach((k) => this.domNode.removeAttribute(k));
+                                    if (this.domNode.style) {
+                                        this.domNode.style.removeProperty('--q2-insert-bg');
+                                        this.domNode.style.removeProperty('--q2-insert-border');
+                                        this.domNode.style.removeProperty('--q2-insert-shadow');
+                                    }
+                                } else if (typeof value === 'object') {
+                                    Object.entries(value).forEach(([k, v]) => {
+                                        if (k === '__styleVars' && v && typeof v === 'object' && this.domNode.style) {
+                                            Object.entries(v).forEach(([varName, varValue]) => {
+                                                if (!varName) {
+                                                    return;
+                                                }
+                                                if (varValue == null || varValue === '') {
+                                                    this.domNode.style.removeProperty(varName);
+                                                } else {
+                                                    this.domNode.style.setProperty(varName, String(varValue));
+                                                }
+                                            });
+                                            return;
+                                        }
+                                        if (!k || !k.startsWith('data-q2-')) {
+                                            return;
+                                        }
+                                        if (v == null || v === false || v === '') {
+                                            this.domNode.removeAttribute(k);
+                                        } else {
+                                            this.domNode.setAttribute(k, String(v));
+                                        }
+                                    });
+                                    // Clean empty attrs.
+                                    keys.forEach((k) => {
+                                        const current = this.domNode.getAttribute(k);
+                                        if (current === '') {
+                                            this.domNode.removeAttribute(k);
+                                        }
+                                    });
+                                }
+                                return;
+                            }
+                            if (name === 'q2-img-w') {
+                                if (!value) {
+                                    this.domNode.removeAttribute('data-q2-img-w');
+                                    this.domNode.style.removeProperty('width');
+                                } else {
+                                    this.domNode.setAttribute('data-q2-img-w', String(value));
+                                    this.domNode.style.width = String(value);
+                                }
+                                return;
+                            }
+                            if (name === 'q2-img-h') {
+                                if (!value) {
+                                    this.domNode.removeAttribute('data-q2-img-h');
+                                    this.domNode.style.removeProperty('height');
+                                } else {
+                                    this.domNode.setAttribute('data-q2-img-h', String(value));
+                                    this.domNode.style.height = String(value);
+                                }
+                                return;
+                            }
+                            if (name === 'q2-img-align') {
+                                if (!value) {
+                                    this.domNode.removeAttribute('data-q2-img-align');
+                                    this.domNode.style.removeProperty('display');
+                                    this.domNode.style.removeProperty('margin-left');
+                                    this.domNode.style.removeProperty('margin-right');
+                                } else {
+                                    const align = String(value);
+                                    this.domNode.setAttribute('data-q2-img-align', align);
+                                    this.domNode.style.display = 'block';
+                                    if (align === 'center') {
+                                        this.domNode.style.marginLeft = 'auto';
+                                        this.domNode.style.marginRight = 'auto';
+                                    } else if (align === 'right') {
+                                        this.domNode.style.marginLeft = 'auto';
+                                        this.domNode.style.marginRight = '0';
+                                    } else {
+                                        this.domNode.style.marginLeft = '0';
+                                        this.domNode.style.marginRight = 'auto';
+                                    }
+                                }
+                                return;
+                            }
+                            super.format(name, value);
+                        }
+                    }
+
+                    window.Quill.register(Q2Image, true);
+                    window.__quill2ImageFormatsRegistered = true;
+                } catch (error) {
+                    console.warn('Unable to register Quill image formats', error);
+                    window.__quill2ImageFormatsRegistered = true;
+                }
+            }
             const quillModules = {
                 toolbar: '#quill2-toolbar',
                 history: {
@@ -469,6 +835,78 @@
             const userSource = window.Quill.sources.USER;
             const silentSource = window.Quill.sources.SILENT;
             const editorScrollContainer = quill.root?.parentElement ?? quill.container ?? null;
+
+            // Preserve custom image attributes when hydrating via dangerouslyPasteHTML.
+            try {
+                quill.clipboard.addMatcher('IMG', (node, delta) => {
+                    const metaNode = node.closest?.('[data-q2-change-id]') || node;
+                    const width = node.getAttribute('data-q2-img-w') || node.style?.width || null;
+                    const height = node.getAttribute('data-q2-img-h') || node.style?.height || null;
+                    const align = node.getAttribute('data-q2-img-align') || null;
+                    const changeId = metaNode?.getAttribute?.('data-q2-change-id') || null;
+                    const changeType = metaNode?.getAttribute?.('data-q2-change-type') || null;
+                    const changeStatus = metaNode?.getAttribute?.('data-q2-change-status') || null;
+                    const userId = metaNode?.getAttribute?.('data-q2-user-id') || null;
+                    const userName = metaNode?.getAttribute?.('data-q2-user-name') || null;
+                    const userEmail = metaNode?.getAttribute?.('data-q2-user-email') || null;
+                    const timestamp = metaNode?.getAttribute?.('data-q2-timestamp') || null;
+
+                    if (!width && !height && !align && !changeId) {
+                        return delta;
+                    }
+                    (delta.ops || []).forEach((op) => {
+                        const inserted = op?.insert;
+                        if (!inserted || typeof inserted !== 'object') {
+                            return;
+                        }
+                        if (!Object.prototype.hasOwnProperty.call(inserted, 'image')) {
+                            return;
+                        }
+                        op.attributes = op.attributes || {};
+                        if (width) op.attributes['q2-img-w'] = String(width);
+                        if (height) op.attributes['q2-img-h'] = String(height);
+                        if (align) op.attributes['q2-img-align'] = String(align);
+                        if (changeId) {
+                            op.attributes['q2-change'] = {
+                                'data-q2-change-id': String(changeId),
+                                'data-q2-change-type': changeType ? String(changeType) : '',
+                                'data-q2-change-status': changeStatus ? String(changeStatus) : '',
+                                'data-q2-user-id': userId ? String(userId) : '',
+                                'data-q2-user-name': userName ? String(userName) : '',
+                                'data-q2-user-email': userEmail ? String(userEmail) : '',
+                                'data-q2-timestamp': timestamp ? String(timestamp) : '',
+                            };
+                        }
+                    });
+                    return delta;
+                });
+            } catch (error) {
+                console.warn('Unable to register IMG clipboard matcher', error);
+            }
+
+            // Image-friendly align: if selection is an image, align that image; otherwise align the line as usual.
+            try {
+                const toolbarModule = quill.getModule('toolbar');
+                toolbarModule?.addHandler?.('align', (value) => {
+                    const range = quill.getSelection();
+                    if (!range) {
+                        quill.format('align', value, userSource);
+                        return;
+                    }
+                    const [leaf] = quill.getLeaf(range.index);
+                    const domNode = leaf && leaf.domNode ? leaf.domNode : null;
+                    if (domNode && domNode.tagName === 'IMG') {
+                        const blot = window.Quill.find(domNode);
+                        const index = typeof blot !== 'undefined' ? quill.getIndex(blot) : range.index;
+                        quill.formatText(index, 1, { 'q2-img-align': value || null }, silentSource);
+                        quill.setSelection(index, 1, silentSource);
+                        return;
+                    }
+                    quill.format('align', value, userSource);
+                });
+            } catch (error) {
+                console.warn('Unable to register image-aware align handler', error);
+            }
 
             const activityFeedEl = document.getElementById('quill2-activity-feed');
             const activitySummaryEl = document.getElementById('quill2-activity-summary');
@@ -503,6 +941,7 @@
             const rejectChangeButton = document.getElementById('quill2-reject-current');
             const acceptAllButton = document.getElementById('quill2-accept-all');
             const rejectAllButton = document.getElementById('quill2-reject-all');
+            const trackToggleButton = document.getElementById('quill2-track-toggle');
 
             const encodeContent = (value = '') => String(value ?? '')
                 .replace(/&/g, '&amp;')
@@ -537,6 +976,7 @@
                     id: comment.id ?? buildCommentId() ?? `cmt-import-${index + 1}`,
                     text: comment.text ?? '',
                     snippet: comment.snippet ?? '',
+                    disconnected: Boolean(comment.disconnected),
                     range: {
                         index: Number.isFinite(rangeIndex) ? rangeIndex : 0,
                         length: Number.isFinite(rangeLength) ? Math.max(0, rangeLength) : 0,
@@ -614,6 +1054,460 @@
                 return { html: '', text: plainText || '' };
             };
 
+            const debounce = (fn, waitMs = 150) => {
+                let timer = null;
+                return (...args) => {
+                    if (timer) {
+                        window.clearTimeout(timer);
+                    }
+                    timer = window.setTimeout(() => {
+                        timer = null;
+                        fn(...args);
+                    }, waitMs);
+                };
+            };
+
+            const scheduleDecorations = debounce(() => {
+                refreshChangeTooltips();
+                decorateTrackedTables();
+                decorateTrackedLists();
+            }, 150);
+
+            const loadCropperJs = (() => {
+                let promise = null;
+                return () => {
+                    if (window.Cropper) {
+                        return Promise.resolve(window.Cropper);
+                    }
+                    if (promise) {
+                        return promise;
+                    }
+                    promise = new Promise((resolve, reject) => {
+                        const existing = document.querySelector('script[data-q2-cropper="1"]');
+                        if (existing) {
+                            existing.addEventListener('load', () => resolve(window.Cropper), { once: true });
+                            existing.addEventListener('error', reject, { once: true });
+                            return;
+                        }
+                        const script = document.createElement('script');
+                        script.src = 'https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js';
+                        script.async = true;
+                        script.defer = true;
+                        script.dataset.q2Cropper = '1';
+                        script.addEventListener('load', () => resolve(window.Cropper), { once: true });
+                        script.addEventListener('error', () => reject(new Error('cropper-load-failed')), { once: true });
+                        document.head.appendChild(script);
+                    }).catch((error) => {
+                        promise = null;
+                        throw error;
+                    });
+                    return promise;
+                };
+            })();
+
+            const setupImageInsertAndResize = () => {
+                const insertImageButton = document.getElementById('quill2-insert-image');
+                const imageModal = document.getElementById('quill2-image-modal');
+                const imageClose = document.getElementById('quill2-image-close');
+                const imageCancel = document.getElementById('quill2-image-cancel');
+                const imageInsert = document.getElementById('quill2-image-insert');
+                const imageInput = document.getElementById('quill2-image-input');
+                const imageDropzone = document.getElementById('quill2-image-dropzone');
+                const imageFilename = document.getElementById('quill2-image-filename');
+                const cropTarget = document.getElementById('quill2-image-crop-target');
+
+                if (!insertImageButton || !imageModal || !imageInsert || !imageInput || !imageDropzone || !cropTarget) {
+                    return;
+                }
+
+                let cropper = null;
+                let lastInsertIndex = null;
+
+                const openImageModal = () => {
+                    const sel = quill.getSelection();
+                    if (sel && typeof sel.index === 'number') {
+                        lastInsertIndex = sel.index;
+                    } else {
+                        lastInsertIndex = Math.max(0, quill.getLength() - 1);
+                    }
+
+                    imageInsert.disabled = true;
+                    if (imageFilename) imageFilename.textContent = '';
+                    cropTarget.removeAttribute('src');
+
+                    if (cropper) {
+                        cropper.destroy();
+                        cropper = null;
+                    }
+
+                    // Lazy-load CropperJS as soon as the modal opens so it's ready when a file is chosen.
+                    loadCropperJs().catch(() => {
+                        // We'll show an alert when the user selects a file.
+                    });
+
+                    imageModal.classList.remove('hidden');
+                    imageModal.classList.add('flex');
+                };
+
+                const closeImageModal = () => {
+                    imageModal.classList.add('hidden');
+                    imageModal.classList.remove('flex');
+
+                    if (cropper) {
+                        cropper.destroy();
+                        cropper = null;
+                    }
+                    imageInput.value = '';
+                };
+
+                const setImageFile = async (file) => {
+                    if (!file) return;
+                    if (!file.type || !file.type.startsWith('image/')) {
+                        alert('Please select an image file.');
+                        return;
+                    }
+
+                    if (imageFilename) imageFilename.textContent = file.name;
+
+                    const reader = new FileReader();
+                    reader.onload = async () => {
+                        cropTarget.src = reader.result;
+
+                        if (cropper) {
+                            cropper.destroy();
+                            cropper = null;
+                        }
+
+                        try {
+                            await loadCropperJs();
+                        } catch (error) {
+                            alert('Image cropper failed to load.');
+                            return;
+                        }
+
+                        cropper = new window.Cropper(cropTarget, {
+                            viewMode: 1,
+                            autoCropArea: 1,
+                            responsive: true,
+                            background: false,
+                            movable: true,
+                            zoomable: true,
+                            rotatable: false,
+                            scalable: false,
+                        });
+
+                        imageInsert.disabled = false;
+                    };
+                    reader.readAsDataURL(file);
+                };
+
+                const uploadBlobAsImage = async (blob) => {
+                    const form = new FormData();
+                    form.append('file', blob, 'image.png');
+
+                    const res = await fetch(imageUploadEndpoint, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: form,
+                        credentials: 'same-origin',
+                    });
+
+                    if (!res.ok) {
+                        const text = await res.text();
+                        throw new Error(text || `Upload failed (${res.status})`);
+                    }
+
+                    const json = await res.json();
+                    if (!json || !json.location) {
+                        throw new Error('Upload response missing image location.');
+                    }
+
+                    return json.location;
+                };
+
+                insertImageButton.addEventListener('click', openImageModal);
+                imageClose?.addEventListener('click', closeImageModal);
+                imageCancel?.addEventListener('click', closeImageModal);
+
+                imageModal.addEventListener('click', (e) => {
+                    if (e.target === imageModal) closeImageModal();
+                });
+
+                imageInput.addEventListener('change', (e) => {
+                    const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+                    setImageFile(file);
+                });
+
+                imageDropzone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+
+                imageDropzone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const file = e.dataTransfer?.files && e.dataTransfer.files[0] ? e.dataTransfer.files[0] : null;
+                    setImageFile(file);
+                });
+
+                imageInsert.addEventListener('click', async () => {
+                    if (!cropper) return;
+                    imageInsert.disabled = true;
+
+                    try {
+                        const canvas = cropper.getCroppedCanvas({
+                            maxWidth: 2000,
+                            maxHeight: 2000,
+                            imageSmoothingEnabled: true,
+                            imageSmoothingQuality: 'high',
+                        });
+
+                        const blob = await new Promise((resolve) => {
+                            canvas.toBlob((b) => resolve(b), 'image/png', 0.92);
+                        });
+
+                        if (!blob) {
+                            throw new Error('Failed to generate cropped image.');
+                        }
+
+                        const url = await uploadBlobAsImage(blob);
+                        const insertAt = typeof lastInsertIndex === 'number'
+                            ? lastInsertIndex
+                            : Math.max(0, quill.getLength() - 1);
+
+                        quill.insertEmbed(insertAt, 'image', url, userSource);
+                        quill.insertText(insertAt + 1, '\n', silentSource);
+                        quill.setSelection(insertAt + 2, 0, silentSource);
+                        closeImageModal();
+                    } catch (err) {
+                        console.error(err);
+                        alert('Image upload failed.');
+                        imageInsert.disabled = false;
+                    }
+                });
+
+                // --- In-editor resize handle (bottom-right, preserves aspect ratio) ---
+                const container = quill.root?.parentElement; // .ql-container
+                if (!container) return;
+
+                const handle = document.createElement('div');
+                handle.className = 'q2-image-resize-handle';
+                container.appendChild(handle);
+
+                let activeImageEl = null;
+                let isResizing = false;
+                let startX = 0;
+                let startWidth = 0;
+                let startHeight = 0;
+
+                const hideHandle = () => {
+                    handle.style.display = 'none';
+                    if (activeImageEl) activeImageEl.classList.remove('q2-image-selected');
+                    activeImageEl = null;
+                };
+
+                const positionHandleForImage = (img) => {
+                    const containerRect = container.getBoundingClientRect();
+                    const imgRect = img.getBoundingClientRect();
+                    const left = imgRect.right - containerRect.left - 7;
+                    const top = imgRect.bottom - containerRect.top - 7;
+                    handle.style.left = `${left}px`;
+                    handle.style.top = `${top}px`;
+                    handle.style.display = 'block';
+                };
+
+                const selectImage = (img) => {
+                    if (!img) return;
+                    if (activeImageEl && activeImageEl !== img) {
+                        activeImageEl.classList.remove('q2-image-selected');
+                    }
+                    activeImageEl = img;
+                    activeImageEl.classList.add('q2-image-selected');
+                    positionHandleForImage(activeImageEl);
+
+                    try {
+                        const blot = window.Quill.find(activeImageEl);
+                        const index = typeof blot !== 'undefined' ? quill.getIndex(blot) : null;
+                        if (typeof index === 'number' && Number.isFinite(index)) {
+                            quill.setSelection(index, 1, silentSource);
+                        }
+                    } catch (error) {
+                        // best-effort
+                    }
+                };
+
+                const persistImageDimensions = (img, widthPx, heightPx) => {
+                    if (!img) return;
+                    try {
+                        const blot = window.Quill.find(img);
+                        const index = typeof blot !== 'undefined' ? quill.getIndex(blot) : null;
+                        if (typeof index !== 'number' || !Number.isFinite(index)) {
+                            return;
+                        }
+                        quill.formatText(index, 1, {
+                            'q2-img-w': `${widthPx}px`,
+                            'q2-img-h': `${heightPx}px`,
+                        }, silentSource);
+                    } catch (error) {
+                        // best-effort
+                    }
+                };
+
+                quill.on('selection-change', (range) => {
+                    if (!range) {
+                        hideHandle();
+                        return;
+                    }
+                    if (isResizing) return;
+
+                    const [leaf] = quill.getLeaf(range.index);
+                    const domNode = leaf && leaf.domNode ? leaf.domNode : null;
+                    if (domNode && domNode.tagName === 'IMG') {
+                        selectImage(domNode);
+                    } else {
+                        hideHandle();
+                    }
+                });
+
+                quill.root.addEventListener('click', (e) => {
+                    const img = e.target && e.target.tagName === 'IMG' ? e.target : null;
+                    if (img) {
+                        selectImage(img);
+                    }
+                });
+
+                const onPointerMove = (e) => {
+                    if (!isResizing || !activeImageEl) return;
+                    const dx = e.clientX - startX;
+                    const newWidth = Math.max(40, Math.round(startWidth + dx));
+                    const ratio = startWidth > 0 ? (startHeight / startWidth) : 1;
+                    const newHeight = Math.max(1, Math.round(newWidth * ratio));
+
+                    // Keep DOM in sync for immediate feedback.
+                    activeImageEl.style.width = `${newWidth}px`;
+                    activeImageEl.style.height = `${newHeight}px`;
+                    // Persist into Quill formats so it survives save->refresh.
+                    persistImageDimensions(activeImageEl, newWidth, newHeight);
+                    positionHandleForImage(activeImageEl);
+                };
+
+                const stopResize = () => {
+                    if (!isResizing) return;
+                    isResizing = false;
+                    document.removeEventListener('pointermove', onPointerMove);
+                    document.removeEventListener('pointerup', stopResize);
+                };
+
+                handle.addEventListener('pointerdown', (e) => {
+                    if (!activeImageEl) return;
+                    e.preventDefault();
+                    isResizing = true;
+                    startX = e.clientX;
+                    const rect = activeImageEl.getBoundingClientRect();
+                    startWidth = rect.width;
+                    startHeight = rect.height;
+                    document.addEventListener('pointermove', onPointerMove);
+                    document.addEventListener('pointerup', stopResize);
+                });
+
+                window.addEventListener('scroll', () => {
+                    if (activeImageEl && !isResizing) positionHandleForImage(activeImageEl);
+                }, true);
+                window.addEventListener('resize', () => {
+                    if (activeImageEl && !isResizing) positionHandleForImage(activeImageEl);
+                });
+            };
+
+                        const setupPrintPreview = () => {
+                                const printButton = document.getElementById('quill2-print');
+                                const printModal = document.getElementById('quill2-print-modal');
+                                const printClose = document.getElementById('quill2-print-close');
+                                const printCancel = document.getElementById('quill2-print-cancel');
+                                const printAction = document.getElementById('quill2-print-action');
+                                const printFrame = document.getElementById('quill2-print-frame');
+
+                                if (!printButton || !printModal || !printAction || !printFrame) {
+                                        return;
+                                }
+
+                                const buildPrintSrcDoc = () => {
+                                        const stylesheetLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"][href]'))
+                                                .map((node) => node.href)
+                                                .filter(Boolean);
+                                        const inlineStyles = Array.from(document.querySelectorAll('style'))
+                                                .map((node) => node.textContent || '')
+                                                .filter(Boolean);
+
+                                        const viewMode = quill?.root?.dataset?.viewMode || null;
+                                        const viewModeAttr = viewMode ? ` data-view-mode="${String(viewMode)}"` : '';
+
+                                        const editorHtml = quill?.root?.innerHTML ?? '';
+
+                                        return `<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <base href="${location.origin}/" />
+        ${stylesheetLinks.map((href) => `<link rel="stylesheet" href="${href}" />`).join('\n')}
+        ${inlineStyles.map((cssText) => `<style>${cssText}</style>`).join('\n')}
+        <style>
+            html, body { margin: 0; padding: 0; background: #ffffff; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .q2-print-wrapper { padding: 24px; }
+            .q2-print-wrapper .ql-container.ql-snow { border: 0 !important; box-shadow: none !important; }
+            .q2-print-wrapper .ql-editor { padding: 0; }
+        </style>
+    </head>
+    <body>
+        <div class="q2-print-wrapper">
+            <div id="quill2-root">
+                <div id="quill2-editor" class="ql-container ql-snow"${viewModeAttr}>
+                    <div class="ql-editor"${viewModeAttr} contenteditable="false">${editorHtml}</div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>`;
+                                };
+
+                                const openPrintModal = () => {
+                                        printFrame.srcdoc = buildPrintSrcDoc();
+                                        printModal.classList.remove('hidden');
+                                        printModal.classList.add('flex');
+                                };
+
+                                const closePrintModal = () => {
+                                        printModal.classList.add('hidden');
+                                        printModal.classList.remove('flex');
+                                        printFrame.removeAttribute('srcdoc');
+                                };
+
+                                const triggerPrint = () => {
+                                        const win = printFrame.contentWindow;
+                                        if (!win) {
+                                                return;
+                                        }
+                                        win.focus();
+                                        win.print();
+                                };
+
+                                printButton.addEventListener('click', openPrintModal);
+                                printClose?.addEventListener('click', closePrintModal);
+                                printCancel?.addEventListener('click', closePrintModal);
+                                printAction.addEventListener('click', triggerPrint);
+
+                                printModal.addEventListener('click', (e) => {
+                                        if (e.target === printModal) closePrintModal();
+                                });
+
+                                document.addEventListener('keydown', (e) => {
+                                        if (e.key === 'Escape' && !printModal.classList.contains('hidden')) {
+                                                closePrintModal();
+                                        }
+                                });
+                        };
+
             let currentViewMode = null;
             let isSidePanelOpen = true;
             let isResizingPanel = false;
@@ -625,6 +1519,10 @@
             let lastActiveActivityRef = null;
             let pendingCommentSelection = null;
             let pendingCommentSnippet = '';
+            let isTrackingEnabled = true;
+
+            setupImageInsertAndResize();
+            setupPrintPreview();
 
             const viewToggleActiveClasses = ['bg-white', 'text-slate-900', 'shadow', '-translate-y-[1px]'];
             const viewToggleInactiveClasses = ['bg-transparent', 'text-slate-500', 'shadow-none', 'translate-y-0'];
@@ -1132,6 +2030,9 @@
                 if (!comment) {
                     return false;
                 }
+                if (!isCommentConnected(comment)) {
+                    return false;
+                }
                 return focusEditorRange(comment.range);
             };
 
@@ -1151,7 +2052,8 @@
                     return null;
                 }
                 const start = Math.max(0, index);
-                const end = start + Math.max(0, length);
+                const selLength = Math.max(0, Number(length) || 0);
+                const endExclusive = start + selLength;
                 return commentLog.find((comment) => {
                     const commentStart = Number(comment.range?.index);
                     const commentLength = Number(comment.range?.length);
@@ -1159,9 +2061,85 @@
                         return false;
                     }
                     const normalizedStart = Math.max(0, commentStart);
-                    const normalizedEnd = normalizedStart + Math.max(1, commentLength);
-                    return start <= normalizedEnd && normalizedStart <= end;
+                    const normalizedLength = Math.max(0, commentLength);
+                    if (normalizedLength <= 0) {
+                        return false;
+                    }
+                    const normalizedEndExclusive = normalizedStart + normalizedLength;
+
+                    // Half-open range comparisons to avoid matching clicks at the exact end boundary.
+                    const overlaps = selLength > 0
+                        ? (start < normalizedEndExclusive && normalizedStart < endExclusive)
+                        : (start >= normalizedStart && start < normalizedEndExclusive);
+                    if (!overlaps) {
+                        return false;
+                    }
+                    return isCommentConnected(comment);
                 }) || null;
+            };
+
+            const isCommentConnected = (comment) => {
+                if (!comment || !quill) {
+                    return false;
+                }
+                if (comment.disconnected) {
+                    return false;
+                }
+                const index = Number(comment?.range?.index);
+                const length = Number(comment?.range?.length);
+                if (!Number.isFinite(index) || !Number.isFinite(length) || length <= 0) {
+                    return false;
+                }
+                const docLength = typeof quill.getLength === 'function' ? quill.getLength() : 0;
+                if (!Number.isFinite(docLength) || docLength <= 0) {
+                    return false;
+                }
+                if (index >= docLength) {
+                    return false;
+                }
+                const text = quill.getText(index, length) || '';
+                // If the originally-commented range has been deleted down to whitespace/newlines,
+                // treat the comment as disconnected so it doesn't hijack editor clicks.
+                const normalized = text
+                    .replace(/\n/g, '')
+                    .replace(/[\u200B\u200C\u200D\uFEFF]/g, '')
+                    .trim();
+                return normalized.length > 0;
+            };
+
+            const disconnectAbandonedComments = () => {
+                if (!quill || !Array.isArray(commentLog) || !commentLog.length) {
+                    return false;
+                }
+                let changed = false;
+                commentLog.forEach((comment) => {
+                    if (!comment || comment.disconnected) {
+                        return;
+                    }
+                    const index = Number(comment?.range?.index);
+                    const length = Number(comment?.range?.length);
+                    if (!Number.isFinite(index) || !Number.isFinite(length) || length <= 0) {
+                        comment.disconnected = true;
+                        changed = true;
+                        return;
+                    }
+                    const docLength = quill.getLength();
+                    if (!Number.isFinite(docLength) || docLength <= 0 || index >= docLength) {
+                        comment.disconnected = true;
+                        changed = true;
+                        return;
+                    }
+                    const text = quill.getText(index, length) || '';
+                    const normalized = text
+                        .replace(/\n/g, '')
+                        .replace(/[\u200B\u200C\u200D\uFEFF]/g, '')
+                        .trim();
+                    if (!normalized.length) {
+                        comment.disconnected = true;
+                        changed = true;
+                    }
+                });
+                return changed;
             };
 
             const captureTrackedSegments = (index, length) => {
@@ -1432,6 +2410,9 @@
                     if (!Number.isFinite(index) || !Number.isFinite(length) || length <= 0) {
                         return;
                     }
+                    if (!isCommentConnected(comment)) {
+                        return;
+                    }
                     quill.formatText(index, length, { background: '#FEF9C3' }, silentSource);
                 });
             };
@@ -1537,8 +2518,7 @@
                     });
                     if (preservedSegments.length) {
                         reapplyInsertStylesForSegments(preservedSegments);
-                        refreshChangeTooltips();
-                        decorateTrackedTables();
+                        scheduleDecorations();
                     }
                 });
             }
@@ -1567,6 +2547,7 @@
                 setStatus(`${verb} this ${descriptor}.`, tone);
                 updateChangeActionButtons();
                 finalizeHistoryBatch();
+                reconcileLedgerWithDom();
             };
 
             acceptChangeButton?.addEventListener('click', () => handleFocusedChangeResolution('accept'));
@@ -1588,6 +2569,7 @@
                 const verb = action === 'accept' ? 'Accepted' : 'Declined';
                 setStatus(`${verb} ${describePendingSummary(pendingCount)}.`, tone);
                 finalizeHistoryBatch();
+                reconcileLedgerWithDom();
             };
 
             acceptAllButton?.addEventListener('click', () => handleBulkChangeResolution('accept'));
@@ -1690,6 +2672,11 @@
             const TABLE_CHANGE_ATTR = 'data-q2-table-change';
             const tableChangeClasses = ['q2-table-change--insert', 'q2-table-change--delete'];
 
+            const LIST_CHANGE_ATTR = 'data-q2-list-change';
+            const listChangeClasses = ['q2-list-change--delete'];
+            const LIST_EMPTY_ATTR = 'data-q2-list-empty';
+            const LI_EMPTY_ATTR = 'data-q2-li-empty';
+
             const decorateTrackedTables = () => {
                 if (!quill?.root) {
                     return;
@@ -1734,6 +2721,205 @@
                 });
             };
 
+            const decorateTrackedLists = () => {
+                if (!quill?.root || !tracker?.attrNames) {
+                    return;
+                }
+                const rootNode = quill.root;
+                const docRef = rootNode.ownerDocument || document;
+                const NodeCtor = docRef.defaultView?.Node || window.Node;
+                const NodeFilterCtor = docRef.defaultView?.NodeFilter || window.NodeFilter;
+                if (!NodeCtor) {
+                    return;
+                }
+                const lists = rootNode.querySelectorAll('ul, ol');
+                lists.forEach((list) => {
+                    list.removeAttribute(LIST_EMPTY_ATTR);
+                });
+                const listItems = rootNode.querySelectorAll('li');
+                listItems.forEach((item) => {
+                    item.removeAttribute(LIST_CHANGE_ATTR);
+                    item.removeAttribute(LI_EMPTY_ATTR);
+                    listChangeClasses.forEach((className) => item.classList.remove(className));
+                    const uiNode = item.querySelector('.ql-ui');
+                    if (uiNode) {
+                        uiNode.removeAttribute(tracker.attrNames.type);
+                    }
+                });
+                listItems.forEach((item) => {
+                    let hasNonDeleteContent = false;
+                    let hasAnyDeleteChange = false;
+
+                    if (NodeFilterCtor && docRef.createTreeWalker) {
+                        const walker = docRef.createTreeWalker(
+                            item,
+                            NodeFilterCtor.SHOW_ELEMENT | NodeFilterCtor.SHOW_TEXT,
+                            null,
+                            false
+                        );
+                        let current = walker.currentNode;
+                        while ((current = walker.nextNode())) {
+                            if (hasNonDeleteContent) {
+                                break;
+                            }
+                            if (current.nodeType === NodeCtor.ELEMENT_NODE) {
+                                const el = current;
+                                if (el.classList?.contains('ql-ui')) {
+                                    continue;
+                                }
+                                if (el.hasAttribute(tracker.attrNames.id)) {
+                                    const typeAttr = el.getAttribute(tracker.attrNames.type);
+                                    if (typeAttr === 'delete') {
+                                        hasAnyDeleteChange = true;
+                                        continue;
+                                    }
+                                    hasNonDeleteContent = true;
+                                    break;
+                                }
+                                continue;
+                            }
+                            if (current.nodeType === NodeCtor.TEXT_NODE) {
+                                const text = current.textContent || '';
+                                if (!text.trim().length) {
+                                    continue;
+                                }
+                                const parentEl = current.parentElement;
+                                if (parentEl) {
+                                    const deleteAncestor = parentEl.closest(
+                                        `[${tracker.attrNames.id}][${tracker.attrNames.type}="delete"]`
+                                    );
+                                    if (deleteAncestor) {
+                                        hasAnyDeleteChange = true;
+                                        continue;
+                                    }
+                                }
+                                hasNonDeleteContent = true;
+                                break;
+                            }
+                        }
+                    } else {
+                        item.childNodes.forEach((node) => {
+                            if (hasNonDeleteContent) {
+                                return;
+                            }
+                            if (node.nodeType === NodeCtor.TEXT_NODE) {
+                                if (node.textContent && node.textContent.trim().length) {
+                                    hasNonDeleteContent = true;
+                                }
+                                return;
+                            }
+                            if (node.nodeType !== NodeCtor.ELEMENT_NODE) {
+                                return;
+                            }
+                            const el = node;
+                            if (el.classList?.contains('ql-ui')) {
+                                return;
+                            }
+                            if (el.hasAttribute(tracker.attrNames.id)) {
+                                const typeAttr = el.getAttribute(tracker.attrNames.type);
+                                if (typeAttr === 'delete') {
+                                    hasAnyDeleteChange = true;
+                                    return;
+                                }
+                                hasNonDeleteContent = true;
+                                return;
+                            }
+                            if (el.textContent && el.textContent.trim().length) {
+                                hasNonDeleteContent = true;
+                            }
+                        });
+                    }
+
+                    if (hasAnyDeleteChange && !hasNonDeleteContent) {
+                        item.setAttribute(LIST_CHANGE_ATTR, 'delete');
+                        item.classList.add('q2-list-change--delete');
+                        const uiNode = item.querySelector('.ql-ui');
+                        if (uiNode) {
+                            uiNode.setAttribute(tracker.attrNames.type, 'delete');
+                        }
+                    }
+                });
+
+                // Mark empty list items (typically leftover <li><br></li> artifacts) so Clean Draft can
+                // collapse indentation without affecting normal list rendering in Redline.
+                listItems.forEach((item) => {
+                    if (item.hasAttribute(LIST_CHANGE_ATTR) && item.getAttribute(LIST_CHANGE_ATTR) === 'delete') {
+                        item.setAttribute(LI_EMPTY_ATTR, '1');
+                        return;
+                    }
+                    let hasAnyContent = false;
+                    if (NodeFilterCtor && docRef.createTreeWalker) {
+                        const walker = docRef.createTreeWalker(
+                            item,
+                            NodeFilterCtor.SHOW_ELEMENT | NodeFilterCtor.SHOW_TEXT,
+                            null,
+                            false
+                        );
+                        let current = walker.currentNode;
+                        while ((current = walker.nextNode())) {
+                            if (current.nodeType === NodeCtor.ELEMENT_NODE) {
+                                const el = current;
+                                if (el.classList?.contains('ql-ui')) {
+                                    continue;
+                                }
+                                if (el.tagName && el.tagName.toLowerCase() === 'br') {
+                                    continue;
+                                }
+                                if (el.hasAttribute?.(tracker.attrNames.id)) {
+                                    const typeAttr = el.getAttribute(tracker.attrNames.type);
+                                    if (typeAttr === 'delete') {
+                                        continue;
+                                    }
+                                    hasAnyContent = true;
+                                    break;
+                                }
+                                // Any other element implies visible content or structure.
+                                hasAnyContent = true;
+                                break;
+                            }
+                            if (current.nodeType === NodeCtor.TEXT_NODE) {
+                                const text = current.textContent || '';
+                                if (!text.trim().length) {
+                                    continue;
+                                }
+                                const parentEl = current.parentElement;
+                                if (parentEl) {
+                                    const deleteAncestor = parentEl.closest(
+                                        `[${tracker.attrNames.id}][${tracker.attrNames.type}="delete"]`
+                                    );
+                                    if (deleteAncestor) {
+                                        continue;
+                                    }
+                                }
+                                hasAnyContent = true;
+                                break;
+                            }
+                        }
+                    } else {
+                        const text = (item.textContent || '').trim();
+                        if (text.length) {
+                            hasAnyContent = true;
+                        }
+                    }
+                    if (!hasAnyContent) {
+                        item.setAttribute(LI_EMPTY_ATTR, '1');
+                    }
+                });
+
+                // Mark lists as empty when they have no visible list items left.
+                lists.forEach((list) => {
+                    const liChildren = Array.from(list.querySelectorAll(':scope > li'));
+                    if (!liChildren.length) {
+                        list.setAttribute(LIST_EMPTY_ATTR, '1');
+                        return;
+                    }
+                    const hasVisibleLi = liChildren.some((li) => !li.hasAttribute(LI_EMPTY_ATTR));
+                    if (!hasVisibleLi) {
+                        list.setAttribute(LIST_EMPTY_ATTR, '1');
+                    }
+                });
+            };
+
             const refreshChangeTooltips = () => {
                 if (!quill || !quill.root) {
                     return;
@@ -1745,6 +2931,7 @@
                 const changes = tracker.getChanges({ sort: 'asc' });
                 const changeMap = new Map(changes.map((change) => [change.id, change]));
                 nodes.forEach((node) => {
+                    node.removeAttribute('data-q2-image-delete-badge');
                     const changeId = node.getAttribute('data-q2-change-id');
                     const metadata = changeMap.get(changeId);
                     const tooltip = describeChangeTooltip(metadata);
@@ -1753,6 +2940,25 @@
                     } else {
                         node.removeAttribute('title');
                     }
+
+                    if (!metadata || metadata.type !== 'delete') {
+                        return;
+                    }
+                    const badgeTime = metadata.createdAt ? formatActivityTime(metadata.createdAt) : null;
+                    if (!badgeTime) {
+                        return;
+                    }
+                    const wrapper = node.tagName === 'IMG'
+                        ? node.closest('[data-q2-change-id]')
+                        : node;
+                    if (!wrapper) {
+                        return;
+                    }
+                    const hasImage = wrapper.tagName === 'IMG' || Boolean(wrapper.querySelector?.('img'));
+                    if (!hasImage) {
+                        return;
+                    }
+                    wrapper.setAttribute('data-q2-image-delete-badge', `Deleted @ ${badgeTime}`);
                 });
             };
 
@@ -1792,11 +2998,32 @@
                 }
             };
 
+            const reconcileLedgerWithDom = () => {
+                if (!quill?.root || !tracker) {
+                    return;
+                }
+                const domHydrated = collectTrackedChangesFromDom();
+                if (!Array.isArray(domHydrated) || !domHydrated.length) {
+                    return;
+                }
+                const existing = tracker.getChanges({ sort: 'asc' });
+                if (!existing.length) {
+                    tracker.loadChanges(domHydrated);
+                    return;
+                }
+                const domIds = new Set(domHydrated.map((change) => change.id));
+                const orphanPending = existing.filter((change) => change.status === 'pending' && !domIds.has(change.id));
+                if (orphanPending.length && domHydrated.length >= existing.length / 2) {
+                    tracker.loadChanges(domHydrated);
+                }
+            };
+
             tracker.on('ledger-change', (changes) => {
                 renderActivityFeed();
                 renderHiddenSpans(changes);
                 refreshChangeTooltips();
                 decorateTrackedTables();
+                decorateTrackedLists();
                 pruneResolvedChangeArtifacts();
                 updateChangeActionButtons();
                 updateBulkChangeButtons();
@@ -1805,6 +3032,7 @@
             const seedInitialChanges = () => {
                 if (Array.isArray(initialChanges) && initialChanges.length) {
                     tracker.loadChanges(initialChanges);
+                    reconcileLedgerWithDom();
                     return true;
                 }
                 const domHydrated = collectTrackedChangesFromDom();
@@ -1820,9 +3048,9 @@
                 renderHiddenSpans(tracker.getChanges({ sort: 'asc' }));
             }
 
-            refreshChangeTooltips();
-            decorateTrackedTables();
+            scheduleDecorations();
             pruneResolvedChangeArtifacts();
+            disconnectAbandonedComments();
             applyCommentHighlights();
             updateBulkChangeButtons();
             refreshPanelVisibility();
@@ -1832,6 +3060,11 @@
             };
             quill.on('selection-change', handleSelectionChange);
             handleSelectionChange();
+
+            quill.on('text-change', () => {
+                disconnectAbandonedComments();
+                scheduleDecorations();
+            });
 
             downloadButton?.addEventListener('click', () => {
                 const payload = tracker.snapshot();
@@ -1862,6 +3095,8 @@
                     }
                     delete quill.root.dataset.viewMode;
                 }
+                // Recompute list/table decorations for the new mode (debounced).
+                scheduleDecorations();
                 applyViewToggleStyles();
             };
 
@@ -2050,8 +3285,7 @@
                 window.requestAnimationFrame(() => {
                     quill.focus();
                     quill.setSelection(Math.min(caretIndex, quill.getLength()), 0, silentSource);
-                    refreshChangeTooltips();
-                    decorateTrackedTables();
+                    scheduleDecorations();
                 });
                 return true;
             };
@@ -2233,15 +3467,70 @@
                     return false;
                 });
             };
+            const updateTrackToggleStyles = () => {
+                if (!trackToggleButton) {
+                    return;
+                }
+                const active = Boolean(isTrackingEnabled);
+                trackToggleButton.setAttribute('aria-pressed', String(active));
+                trackToggleButton.setAttribute('aria-disabled', 'false');
+                trackToggleButton.disabled = false;
+
+                const resetClasses = [
+                    'bg-white',
+                    'bg-slate-50',
+                    'bg-emerald-50',
+                    'text-slate-500',
+                    'text-slate-700',
+                    'text-emerald-700',
+                    'border-slate-200',
+                    'border-emerald-200',
+                ];
+                resetClasses.forEach((cls) => trackToggleButton.classList.remove(cls));
+
+                if (active) {
+                    trackToggleButton.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                    trackToggleButton.title = 'Disable track changes';
+                    trackToggleButton.innerHTML = `
+                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+                            <rect x="6" y="6" width="8" height="8" rx="1" fill="#000000" />
+                        </svg>
+                        <span class="sr-only">Disable track changes</span>
+                    `;
+                } else {
+                    trackToggleButton.classList.add('bg-white', 'text-slate-500', 'border-slate-200');
+                    trackToggleButton.title = 'Enable track changes';
+                    trackToggleButton.innerHTML = `
+                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+                            <circle cx="10" cy="10" r="4" fill="#dc2626" />
+                        </svg>
+                        <span class="sr-only">Enable track changes</span>
+                    `;
+                }
+            };
+
+            const setTrackingEnabled = (enabled) => {
+                const next = Boolean(enabled);
+                isTrackingEnabled = next;
+                if (next) {
+                    tracker.enableTracking();
+                } else {
+                    tracker.disableTracking();
+                }
+                updateTrackToggleStyles();
+            };
+
+            const toggleTrackingEnabled = () => setTrackingEnabled(!isTrackingEnabled);
 
             redlineBtn?.addEventListener('click', () => setViewMode('redline'));
             cleanBtn?.addEventListener('click', () => setViewMode('clean'));
+            trackToggleButton?.addEventListener('click', toggleTrackingEnabled);
 
             setViewMode('redline');
+            setTrackingEnabled(true);
             registerSanitizedPasteHandler();
             registerSmartTypographyBindings();
-            refreshChangeTooltips();
-            decorateTrackedTables();
+            scheduleDecorations();
 
             saveButton?.addEventListener('click', async () => {
                 if (!saveEndpoint) {
@@ -2250,6 +3539,7 @@
                 saveButton.disabled = true;
                 setStatus('Saving...');
                 try {
+                    disconnectAbandonedComments();
                     const snapshot = tracker.snapshot();
                     const response = await fetch(saveEndpoint, {
                         method: 'POST',
@@ -2332,6 +3622,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
     <style>
         #quill2-root #quill2-toolbar.ql-toolbar.ql-snow {
             border: none;
@@ -2341,6 +3632,30 @@
         #quill2-root #quill2-editor.ql-container.ql-snow {
             border: none;
             background: transparent;
+        }
+
+        #quill2-root #quill2-editor.ql-container {
+            position: relative;
+        }
+
+        #quill2-root #quill2-editor .q2-image-selected {
+            outline: 2px solid rgba(15, 23, 42, 0.35);
+            outline-offset: 2px;
+        }
+
+        #quill2-root .q2-image-resize-handle {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 9999px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid #fff;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            cursor: nwse-resize;
+            z-index: 15;
+            display: none;
+            user-select: none;
+            touch-action: none;
         }
 
         #quill2-root {
@@ -2365,6 +3680,51 @@
             box-shadow: inset 0 -0.35em 0 var(--q2-insert-shadow, var(--q2-insert-shadow-default));
             border-bottom: 1px solid var(--q2-insert-border, var(--q2-insert-border-default));
             border-radius: 0.15rem;
+        }
+
+        #quill2-root #quill2-editor img[data-q2-change-type="insert"],
+        #quill2-root #quill2-editor [data-q2-change-type="insert"] img {
+            outline: 2px solid var(--q2-insert-border, var(--q2-insert-border-default));
+            box-shadow: 0 0 0 2px var(--q2-insert-bg, var(--q2-insert-bg-default));
+            border-radius: 0.75rem;
+        }
+
+        #quill2-root #quill2-editor img[data-q2-change-type="delete"],
+        #quill2-root #quill2-editor [data-q2-change-type="delete"] img {
+            outline: 2px solid #991b1b;
+            border-radius: 0.75rem;
+            opacity: 0.65;
+            filter: grayscale(100%);
+        }
+
+        #quill2-root #quill2-editor [data-q2-image-delete-badge] {
+            position: relative;
+            display: inline-block;
+        }
+
+        #quill2-root #quill2-editor [data-q2-image-delete-badge]::after {
+            content: attr(data-q2-image-delete-badge);
+            position: absolute;
+            top: -0.85rem;
+            right: 0.5rem;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            padding: 0.15rem 0.55rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid currentColor;
+            color: #991b1b;
+            pointer-events: none;
+        }
+
+        #quill2-root #quill2-editor[data-view-mode="clean"] img[data-q2-change-type="insert"],
+        #quill2-root #quill2-editor[data-view-mode="clean"] [data-q2-change-type="insert"] img,
+        #quill2-root #quill2-editor[data-view-mode="clean"] img[data-q2-change-type="delete"],
+        #quill2-root #quill2-editor[data-view-mode="clean"] [data-q2-change-type="delete"] img {
+            outline: none;
+            box-shadow: none;
         }
 
         #quill2-root #quill2-editor [data-q2-change-type="delete"] {
@@ -2438,6 +3798,28 @@
         #quill2-root #quill2-editor[data-view-mode="clean"] table[data-q2-table-change]::after {
             content: none;
             display: none;
+        }
+
+        #quill2-root #quill2-editor li[data-q2-list-change="delete"] .ql-ui::before {
+            color: #b91c1c;
+            text-decoration: line-through;
+            text-decoration-thickness: 2px;
+            text-decoration-color: #991b1b;
+        }
+
+        #quill2-root #quill2-editor[data-view-mode="clean"] li[data-q2-list-change="delete"] {
+            display: none;
+        }
+
+        #quill2-root #quill2-editor[data-view-mode="clean"] li[data-q2-li-empty="1"] {
+            display: none;
+        }
+
+        #quill2-root #quill2-editor[data-view-mode="clean"] ul[data-q2-list-empty="1"],
+        #quill2-root #quill2-editor[data-view-mode="clean"] ol[data-q2-list-empty="1"] {
+            display: none;
+            margin: 0;
+            padding: 0;
         }
 
         #quill2-root .quill2-activity-active {

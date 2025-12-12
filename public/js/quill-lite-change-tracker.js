@@ -20,6 +20,7 @@
     const EMBED_PLACEHOLDER = '[embed]';
     const PREVIEW_MAX_LENGTH = 320;
     const LINEBREAK_MARKER = '\u23ce';
+    const STRUCTURED_ATTR_PATTERN = /^(table|ql-table|list|header|blockquote)/i;
 
     const ensureArray = (value) => (Array.isArray(value) ? value : []);
 
@@ -198,10 +199,11 @@
         loadChanges(changes = []) {
             this._ledger.clear();
             ensureArray(changes).forEach((change) => {
-                if (!change || !change.id) {
+                const normalized = this._normalizeIncomingChange(change);
+                if (!normalized) {
                     return;
                 }
-                this._ledger.set(change.id, { ...change });
+                this._ledger.set(normalized.id, normalized);
             });
             this._emit('ledger-change', this.getChanges());
         }
@@ -238,7 +240,10 @@
 
         _bind() {
             this._boundTextChange = (delta, oldDelta, source) => {
-                if (!this._trackingEnabled || source !== this.options.source) {
+                if (!this._trackingEnabled) {
+                    return;
+                }
+                if (source === this.QuillRef.sources.SILENT) {
                     return;
                 }
                 this._handleUserDelta(delta, oldDelta);
@@ -273,10 +278,52 @@
                     this._lastCursor += op.insert.length;
                     return;
                 }
+                if (Object.prototype.hasOwnProperty.call(op, 'insert')) {
+                    this._processEmbedInsert(this._lastCursor, op.insert);
+                    this._lastCursor += 1;
+                    return;
+                }
                 if (typeof op.delete === 'number') {
                     this._processDelete(this._lastCursor, op.delete, oldDelta);
                 }
             });
+        }
+
+        _processEmbedInsert(index, embed) {
+            // Treat non-string inserts (images, embeds, table structures) as length-1 inserts.
+            if (!Object.prototype.hasOwnProperty.call({ insert: embed }, 'insert')) {
+                return;
+            }
+            if (this._isTableishEmbed(embed)) {
+                return;
+            }
+            this._deleteContinuance = null;
+            this._insertContinuance = null;
+            const length = 1;
+            const timestamp = new Date().toISOString();
+            const batch = this._resolveBatchContext('insert', null);
+            const changeId = batch?.id ?? this._generateId();
+            const changeTimestamp = batch?.startedAt ?? timestamp;
+            const attrs = this._composeAttrs({
+                id: changeId,
+                type: 'insert',
+                status: 'pending',
+                timestamp: changeTimestamp,
+            });
+
+            this.quill.formatText(index, length, { [this._blotName]: attrs }, this.QuillRef.sources.SILENT);
+
+            const change = {
+                id: changeId,
+                type: 'insert',
+                status: 'pending',
+                preview: EMBED_PLACEHOLDER,
+                createdAt: changeTimestamp,
+                updatedAt: changeTimestamp,
+                length,
+                user: { ...this.options.user },
+            };
+            this._upsertChange(change, 'insert');
         }
 
         _processInsert(index, text) {
@@ -339,7 +386,8 @@
             if (deltaLength <= 0) {
                 return;
             }
-            if (this._isStructuralDelete(residualDelta)) {
+            if (this._isStructuralDelete(residualDelta) || this._isTableStructuralDelete(residualDelta)) {
+                this._pendingDeleteDirection = null;
                 return;
             }
             const preview = this._previewFromDelta(residualDelta);
@@ -355,6 +403,8 @@
                 timestamp: changeTimestamp,
             });
             let insertionDelta = new this.Delta().retain(index);
+            const embedOffsetsToFormat = [];
+            let localOffset = 0;
             ensureArray(residualDelta.ops).forEach((op) => {
                 if (!Object.prototype.hasOwnProperty.call(op, 'insert')) {
                     return;
@@ -363,10 +413,32 @@
                 if (Object.prototype.hasOwnProperty.call(preservedAttrs, this._blotName)) {
                     delete preservedAttrs[this._blotName];
                 }
+
+                // IMPORTANT: embeds (like images) cannot reliably carry object-valued attributes
+                // in the inserted delta. Insert with preserved attrs, then apply q2-change via
+                // formatText so Quill can wrap/mark it appropriately.
+                if (typeof op.insert === 'object') {
+                    insertionDelta = insertionDelta.insert(op.insert, preservedAttrs);
+                    embedOffsetsToFormat.push(localOffset);
+                    localOffset += 1;
+                    return;
+                }
+
                 const mergedAttrs = { ...preservedAttrs, [this._blotName]: attrs };
                 insertionDelta = insertionDelta.insert(op.insert, mergedAttrs);
+                localOffset += typeof op.insert === 'string' ? op.insert.length : 0;
             });
             this.quill.updateContents(insertionDelta, this.QuillRef.sources.SILENT);
+
+            if (embedOffsetsToFormat.length) {
+                embedOffsetsToFormat.forEach((offset) => {
+                    try {
+                        this.quill.formatText(index + offset, 1, { [this._blotName]: attrs }, this.QuillRef.sources.SILENT);
+                    } catch (error) {
+                        // best-effort; embed will still exist even if format fails
+                    }
+                });
+            }
             const direction = this._pendingDeleteDirection;
             const caretIndex = direction === 'forward'
                 ? index + deltaLength
@@ -420,7 +492,10 @@
                     }
                 } else if (change.type === 'delete') {
                     if (action === 'accept') {
-                        this.quill.deleteText(range.index, range.length, this.QuillRef.sources.SILENT);
+                        const handled = this._resolveStructuredDelete(change, range);
+                        if (!handled) {
+                            this.quill.deleteText(range.index, range.length, this.QuillRef.sources.SILENT);
+                        }
                     } else {
                         this._resetFormatting(range);
                     }
@@ -432,6 +507,64 @@
             change.resolvedBy = { ...this.options.user };
             this._upsertChange(change, 'resolve');
             return change;
+        }
+
+        _resolveStructuredDelete(change, range) {
+            if (!change || change.type !== 'delete' || !range) {
+                return false;
+            }
+            if (!this.quill || !this.quill.root) {
+                return false;
+            }
+            const root = this.quill.root;
+            const selector = `[${this.attrNames.id}="${change.id}"]`;
+            const nodes = root.querySelectorAll(selector);
+            if (!nodes.length) {
+                return false;
+            }
+            const tables = new Set();
+            nodes.forEach((node) => {
+                const table = node.closest && node.closest('table');
+                if (table) {
+                    tables.add(table);
+                }
+            });
+            if (!tables.size) {
+                return false;
+            }
+            if (tables.size > 1) {
+                return false;
+            }
+            const [tableElement] = Array.from(tables);
+            if (!tableElement) {
+                return false;
+            }
+            const parchmentFind = this.Parchment && typeof this.Parchment.find === 'function'
+                ? this.Parchment.find.bind(this.Parchment)
+                : (this.QuillRef && typeof this.QuillRef.find === 'function'
+                    ? this.QuillRef.find.bind(this.QuillRef)
+                    : null);
+            if (!parchmentFind) {
+                return false;
+            }
+            let blot = parchmentFind(tableElement);
+            if (!blot) {
+                return false;
+            }
+            while (blot.parent && blot.parent !== this.quill.scroll && blot.parent.statics && blot.parent.statics.blotName !== 'table') {
+                blot = blot.parent;
+            }
+            const targetBlot = blot.parent && blot.parent.statics && blot.parent.statics.blotName === 'table' ? blot.parent : blot;
+            if (!targetBlot || typeof targetBlot.length !== 'function' || typeof targetBlot.offset !== 'function') {
+                return false;
+            }
+            const index = targetBlot.offset(this.quill.scroll);
+            const length = targetBlot.length();
+            if (typeof index !== 'number' || typeof length !== 'number' || length <= 0) {
+                return false;
+            }
+            this.quill.deleteText(index, length, this.QuillRef.sources.SILENT);
+            return true;
         }
 
         _resetFormatting(range) {
@@ -598,7 +731,52 @@
             if (!attrs) {
                 return false;
             }
-            return Object.keys(attrs).some((attrName) => /^(table|ql-table)/i.test(attrName) || attrName.includes('table-'));
+            return Object.keys(attrs).some((attrName) => STRUCTURED_ATTR_PATTERN.test(attrName) || attrName.includes('table-'));
+        }
+
+        _isTableishEmbed(embed) {
+            if (!embed || typeof embed !== 'object') {
+                return false;
+            }
+            return Object.keys(embed).some((key) => String(key).toLowerCase().includes('table'));
+        }
+
+        _isTableStructuralDelete(delta) {
+            // Row/column operations often delete only table newline structure.
+            // Reinserting those newlines as inline-tracked content corrupts table rendering.
+            let hasNonNewlineContent = false;
+            let hasTableNewlines = false;
+            ensureArray(delta?.ops).forEach((op) => {
+                if (!Object.prototype.hasOwnProperty.call(op, 'insert')) {
+                    return;
+                }
+                if (typeof op.insert !== 'string') {
+                    // Only treat *table-ish* embeds as table structure.
+                    // Other embeds (e.g., images) should be redlined normally.
+                    if (this._isTableishEmbed(op.insert)) {
+                        hasTableNewlines = true;
+                    } else {
+                        hasNonNewlineContent = true;
+                    }
+                    return;
+                }
+                const opAttrs = op.attributes || null;
+                const stripped = op.insert.replace(/\n/g, '').trim();
+                if (stripped.length) {
+                    hasNonNewlineContent = true;
+                }
+                if (op.insert.includes('\n') && this._hasTableAttributes(opAttrs)) {
+                    hasTableNewlines = true;
+                }
+            });
+            return hasTableNewlines && !hasNonNewlineContent;
+        }
+
+        _hasTableAttributes(attrs) {
+            if (!attrs) {
+                return false;
+            }
+            return Object.keys(attrs).some((attrName) => String(attrName).toLowerCase().includes('table'));
         }
 
         _writeDataset(node, data = {}) {
@@ -766,6 +944,50 @@
                 hash |= 0;
             }
             return hash;
+        }
+
+        _normalizeIncomingChange(raw) {
+            if (!raw || !raw.id) {
+                return null;
+            }
+            const id = String(raw.id);
+            const type = raw.type === 'delete' ? 'delete' : 'insert';
+            const allowedStatuses = new Set(['pending', 'accepted', 'rejected']);
+            const status = allowedStatuses.has(raw.status) ? raw.status : 'pending';
+            const baseUser = this.options.user || {};
+            const rawUser = raw.user || {};
+            const user = {
+                id: rawUser.id || baseUser.id || 'anonymous',
+                name: rawUser.name || baseUser.name || 'Anonymous User',
+                email: rawUser.email || baseUser.email || null,
+            };
+            const length = Number.isFinite(raw.length) && raw.length >= 0 ? raw.length : 0;
+            const preview = this._stringPreview(typeof raw.preview === 'string' ? raw.preview : '');
+            const createdAt = typeof raw.createdAt === 'string' && raw.createdAt.trim().length
+                ? raw.createdAt
+                : new Date().toISOString();
+            const updatedAt = typeof raw.updatedAt === 'string' && raw.updatedAt.trim().length
+                ? raw.updatedAt
+                : createdAt;
+            const normalized = {
+                id,
+                type,
+                status,
+                preview,
+                createdAt,
+                updatedAt,
+                length,
+                user,
+            };
+            if (status !== 'pending') {
+                if (typeof raw.resolvedAt === 'string' && raw.resolvedAt.trim().length) {
+                    normalized.resolvedAt = raw.resolvedAt;
+                }
+                if (raw.resolvedBy && typeof raw.resolvedBy === 'object') {
+                    normalized.resolvedBy = { ...raw.resolvedBy };
+                }
+            }
+            return normalized;
         }
 
         _splitRemovedDelta(delta) {

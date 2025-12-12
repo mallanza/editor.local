@@ -9,6 +9,7 @@ use App\Http\Controllers\QuillChangeController;
 use App\Http\Controllers\QuillCommentController;
 use App\Http\Controllers\QuillPoCController;
 use App\Http\Controllers\QuillLiteController;
+use App\Http\Controllers\ImageUploadController;
 
 
 Route::get('/dashboard', function () {
@@ -39,12 +40,9 @@ Route::post('mce-store', [MceDocumentController::class, 'store'])->name('mce.sto
 Route::get('mce-load/{document}', [MceDocumentController::class, 'load'])->name('mce.load');
 Route::post('mce-update/{document}', [MceDocumentController::class, 'update'])->name('mce.update');
 
-Route::post('/images/upload', function (Illuminate\Http\Request $req) {
-    $req->validate(['file' => 'required|image|max:5120']);
-    $path = $req->file('file')->store('public/uploads');
-    $url  = Storage::url($path);
-    return response()->json(['location' => $url]);
-})->name('images.upload');
+Route::post('/images/upload', ImageUploadController::class)
+    ->middleware(['auth', 'throttle:30,1'])
+    ->name('images.upload');
 
 Route::get('/quill2', [QuillLiteController::class, 'show'])->name('quill2.show');
 Route::post('/quill2/save', [QuillLiteController::class, 'save'])->name('quill2.save');
