@@ -17,6 +17,12 @@
     const STYLE_VARS_KEY = '__styleVars';
     const INSERT_STYLE_VARS = ['--q2-insert-bg', '--q2-insert-border', '--q2-insert-shadow'];
 
+    const buildStyleVarAttrNames = (prefix = 'q2') => ({
+        bg: `data-${prefix}-insert-bg`,
+        border: `data-${prefix}-insert-border`,
+        shadow: `data-${prefix}-insert-shadow`,
+    });
+
     const EMBED_PLACEHOLDER = '[embed]';
     const PREVIEW_MAX_LENGTH = 320;
     const LINEBREAK_MARKER = '\u23ce';
@@ -48,6 +54,7 @@
             this.options.source = this.options.source ?? this.QuillRef.sources.USER;
 
             this.attrNames = this._buildAttrNames(this.options.attrPrefix);
+            this.styleVarAttrNames = buildStyleVarAttrNames(this.options.attrPrefix);
             this._blotName = `${this.options.attrPrefix}-change`;
             this._ledger = new Map();
             this._listeners = new Map();
@@ -209,33 +216,72 @@
         }
 
         findChangeRange(changeId) {
-            if (!changeId) {
+            const ranges = this.findChangeRanges(changeId);
+            if (!ranges.length) {
                 return null;
+            }
+            if (ranges.length === 1) {
+                return ranges[0];
+            }
+
+            // Backward-compatible behavior: return a single bounding range.
+            // Note that for non-contiguous change segments this will include untracked content
+            // between segments. Call findChangeRanges() to operate on segments precisely.
+            const start = ranges[0].index;
+            const last = ranges[ranges.length - 1];
+            const end = last.index + last.length;
+            return { index: start, length: Math.max(0, end - start) };
+        }
+
+        findChangeRanges(changeId) {
+            if (!changeId) {
+                return [];
             }
             const contents = this.quill.getContents();
             let cursor = 0;
-            let start = null;
-            let end = null;
+            let activeStart = null;
+            let activeEnd = null;
+            const ranges = [];
+
+            const closeActive = () => {
+                if (activeStart === null) {
+                    return;
+                }
+                const end = activeEnd ?? activeStart;
+                const length = Math.max(0, end - activeStart);
+                if (length > 0) {
+                    ranges.push({ index: activeStart, length });
+                }
+                activeStart = null;
+                activeEnd = null;
+            };
+
             ensureArray(contents.ops).forEach((op) => {
                 if (!Object.prototype.hasOwnProperty.call(op, 'insert')) {
+                    closeActive();
                     cursor += typeof op.retain === 'number' ? op.retain : 0;
                     return;
                 }
                 const opLength = typeof op.insert === 'string' ? op.insert.length : 1;
                 const changeMeta = op.attributes?.[this._blotName];
-                if (changeMeta?.[this.attrNames.id] === changeId) {
-                    if (start === null) {
-                        start = cursor;
+                const matches = changeMeta?.[this.attrNames.id] === changeId;
+                if (matches) {
+                    if (activeStart === null) {
+                        activeStart = cursor;
+                        activeEnd = cursor + opLength;
+                    } else {
+                        activeEnd = cursor + opLength;
                     }
-                    end = cursor + opLength;
+                } else {
+                    closeActive();
                 }
                 cursor += opLength;
             });
-            if (start === null) {
-                return null;
-            }
-            const length = Math.max(0, (end ?? start) - start);
-            return { index: start, length };
+            closeActive();
+
+            // Ensure stable ordering.
+            ranges.sort((a, b) => a.index - b.index);
+            return ranges;
         }
 
         _bind() {
@@ -526,24 +572,54 @@
             if (!change || change.status !== 'pending') {
                 return change || null;
             }
+            const ranges = this.findChangeRanges(changeId);
             const range = this.findChangeRange(changeId);
-            if (range) {
+            let applied = false;
+
+            const appearsToBeWholeTableDelete = change.type === 'delete' ? this._appearsToBeWholeTableDelete(change) : false;
+            if (ranges.length) {
                 if (change.type === 'insert') {
                     if (action === 'accept') {
-                        this._resetFormatting(range);
+                        ranges.forEach((r) => this._resetFormatting(r));
+                        applied = true;
                     } else {
-                        this.quill.deleteText(range.index, range.length, this.QuillRef.sources.SILENT);
+                        // Delete from end -> start so indices remain stable.
+                        [...ranges]
+                            .sort((a, b) => b.index - a.index)
+                            .forEach((r) => {
+                                this.quill.deleteText(r.index, r.length, this.QuillRef.sources.SILENT);
+                            });
+                        applied = true;
                     }
                 } else if (change.type === 'delete') {
                     if (action === 'accept') {
+                        // Structured deletes (notably tables) need special handling.
+                        // Use the (possibly bounding) range for table-span checks, but delete
+                        // exact segments for normal inline delete changes.
                         const handled = this._resolveStructuredDelete(change, range);
-                        if (!handled) {
-                            this.quill.deleteText(range.index, range.length, this.QuillRef.sources.SILENT);
+                        if (!handled && !appearsToBeWholeTableDelete) {
+                            [...ranges]
+                                .sort((a, b) => b.index - a.index)
+                                .forEach((r) => {
+                                    this.quill.deleteText(r.index, r.length, this.QuillRef.sources.SILENT);
+                                });
+                            applied = true;
+                        } else {
+                            applied = true;
                         }
                     } else {
-                        this._resetFormatting(range);
+                        ranges.forEach((r) => this._resetFormatting(r));
+                        applied = true;
                     }
                 }
+            } else if (change.type === 'delete' && action === 'accept') {
+                // Structured deletes (notably tables) may not map to a stable Delta range.
+                // Resolve from DOM structure; only mark accepted if we applied a change.
+                applied = this._resolveStructuredDelete(change, null);
+            }
+
+            if (!applied) {
+                return change;
             }
             const resolution = action === 'accept' ? 'accepted' : 'rejected';
             change.status = resolution;
@@ -553,8 +629,55 @@
             return change;
         }
 
+        _appearsToBeWholeTableDelete(change) {
+            if (!change || change.type !== 'delete' || !this.quill?.root) {
+                return false;
+            }
+            const root = this.quill.root;
+            const selector = `[${this.attrNames.id}="${change.id}"]`;
+            const nodes = root.querySelectorAll(selector);
+            if (!nodes.length) {
+                return false;
+            }
+            const tables = new Set();
+            nodes.forEach((node) => {
+                const table = node.closest && node.closest('table');
+                if (table) {
+                    tables.add(table);
+                }
+            });
+            if (tables.size !== 1) {
+                return false;
+            }
+            const [tableElement] = Array.from(tables);
+            if (!tableElement) {
+                return false;
+            }
+            const deleteNodeSelector = `[${this.attrNames.type}="delete"][${this.attrNames.id}]`;
+            const deleteNodes = tableElement.querySelectorAll(deleteNodeSelector);
+            const deleteIds = new Set(
+                Array.from(deleteNodes)
+                    .map((node) => node.getAttribute(this.attrNames.id))
+                    .filter(Boolean)
+            );
+            const onlyThisDeleteChange = deleteIds.size === 1 && deleteIds.has(change.id);
+            if (!onlyThisDeleteChange) {
+                return false;
+            }
+            try {
+                const clone = tableElement.cloneNode(true);
+                clone.querySelectorAll('.ql-ui').forEach((node) => node.remove());
+                clone.querySelectorAll(`[${this.attrNames.type}="delete"]`).forEach((node) => node.remove());
+                const remainingText = (clone.textContent || '').replace(/\s+/g, '');
+                const remainingEmbeds = clone.querySelector('img, video, iframe, object, embed');
+                return !remainingText.length && !remainingEmbeds;
+            } catch (error) {
+                return false;
+            }
+        }
+
         _resolveStructuredDelete(change, range) {
-            if (!change || change.type !== 'delete' || !range) {
+            if (!change || change.type !== 'delete') {
                 return false;
             }
             if (!this.quill || !this.quill.root) {
@@ -583,6 +706,41 @@
             if (!tableElement) {
                 return false;
             }
+
+            // If this delete change appears to represent a full-table deletion, accept should
+            // remove the entire table structure (not just the text inside tracked spans).
+            // Otherwise we can end up with an empty "committed" table after accepting.
+            const deleteNodeSelector = `[${this.attrNames.type}="delete"][${this.attrNames.id}]`;
+            const deleteNodes = tableElement.querySelectorAll(deleteNodeSelector);
+            const deleteIds = new Set(
+                Array.from(deleteNodes)
+                    .map((node) => node.getAttribute(this.attrNames.id))
+                    .filter(Boolean)
+            );
+            const onlyThisDeleteChange = deleteIds.size === 1 && deleteIds.has(change.id);
+
+            let tableWouldBeEmptyAfterRemovingDeletes = false;
+            if (onlyThisDeleteChange) {
+                try {
+                    const clone = tableElement.cloneNode(true);
+                    clone.querySelectorAll('.ql-ui').forEach((node) => node.remove());
+                    clone.querySelectorAll(`[${this.attrNames.type}="delete"]`).forEach((node) => node.remove());
+                    const remainingText = (clone.textContent || '').replace(/\s+/g, '');
+                    const remainingEmbeds = clone.querySelector('img, video, iframe, object, embed');
+                    tableWouldBeEmptyAfterRemovingDeletes = !remainingText.length && !remainingEmbeds;
+                } catch (error) {
+                    tableWouldBeEmptyAfterRemovingDeletes = false;
+                }
+            }
+
+            const shouldDeleteWholeTable = onlyThisDeleteChange && tableWouldBeEmptyAfterRemovingDeletes;
+
+            // If we don't believe this is a whole-table delete and we don't have a delta range,
+            // we can't safely resolve a structured delete.
+            if (!range && !shouldDeleteWholeTable) {
+                return false;
+            }
+
             const parchmentFind = this.Parchment && typeof this.Parchment.find === 'function'
                 ? this.Parchment.find.bind(this.Parchment)
                 : (this.QuillRef && typeof this.QuillRef.find === 'function'
@@ -591,24 +749,121 @@
             if (!parchmentFind) {
                 return false;
             }
-            let blot = parchmentFind(tableElement);
+
+            // quill-table-better does not necessarily use the blotName "table".
+            // Walk up the blot chain and pick the outermost *table-like* blot.
+            let blot = parchmentFind(tableElement, true) || parchmentFind(tableElement) || parchmentFind(nodes[0], true) || parchmentFind(nodes[0]);
             if (!blot) {
                 return false;
             }
-            while (blot.parent && blot.parent !== this.quill.scroll && blot.parent.statics && blot.parent.statics.blotName !== 'table') {
-                blot = blot.parent;
+            let current = blot;
+            let tableBlot = null;
+            let domTableBlot = null;
+            let tableWrapperBlot = null;
+            while (current && current !== this.quill.scroll) {
+                const blotName = current.statics?.blotName;
+                if (!tableBlot && blotName && /table/i.test(blotName)) {
+                    tableBlot = current;
+                }
+                const domNode = current.domNode;
+                if (!domTableBlot && domNode && domNode.tagName && domNode.tagName.toLowerCase() === 'table') {
+                    domTableBlot = current;
+                }
+                if (!tableWrapperBlot && domNode && domNode.contains && domNode.contains(tableElement)) {
+                    tableWrapperBlot = current;
+                }
+                current = current.parent;
             }
-            const targetBlot = blot.parent && blot.parent.statics && blot.parent.statics.blotName === 'table' ? blot.parent : blot;
-            if (!targetBlot || typeof targetBlot.length !== 'function' || typeof targetBlot.offset !== 'function') {
+
+            const structuralBlot = domTableBlot || tableWrapperBlot || tableBlot;
+            const targetBlot = shouldDeleteWholeTable ? structuralBlot : (structuralBlot || blot);
+            if (!targetBlot) {
                 return false;
             }
-            const index = targetBlot.offset(this.quill.scroll);
-            const length = targetBlot.length();
+
+            const candidateBlots = Array.from(
+                new Set([domTableBlot, tableWrapperBlot, tableBlot, blot].filter(Boolean))
+            );
+
+            const deleteTableUsingCandidate = (candidate) => {
+                // Prefer index via Quill API when available; otherwise fall back to blot.offset().
+                let index = null;
+                if (typeof this.quill.getIndex === 'function') {
+                    try {
+                        index = this.quill.getIndex(candidate);
+                    } catch (error) {
+                        index = null;
+                    }
+                }
+                if (index === null && typeof candidate.offset === 'function') {
+                    index = candidate.offset(this.quill.scroll);
+                }
+                const length = typeof candidate.length === 'function' ? candidate.length() : null;
+
+                if ((typeof index !== 'number' || typeof length !== 'number' || length <= 0) && typeof candidate.remove === 'function') {
+                    try {
+                        candidate.remove();
+                        if (typeof this.quill.update === 'function') {
+                            this.quill.update(this.QuillRef.sources.SILENT);
+                        }
+                        return true;
+                    } catch (error) {
+                        return false;
+                    }
+                }
+
+                if (typeof index !== 'number' || typeof length !== 'number' || length <= 0) {
+                    return false;
+                }
+
+                this.quill.deleteText(index, length, this.QuillRef.sources.SILENT);
+                return true;
+            };
+
+            // If this delete represents a full-table delete, accept should remove the whole table
+            // even if the tracked delete range doesn't span the underlying table blot.
+            if (shouldDeleteWholeTable) {
+                // Try candidates until the original table element disappears.
+                for (let i = 0; i < candidateBlots.length; i += 1) {
+                    const didAttempt = deleteTableUsingCandidate(candidateBlots[i]);
+                    if (didAttempt && !root.contains(tableElement)) {
+                        return true;
+                    }
+                }
+                // Nothing actually removed the table; treat as not handled.
+                return false;
+            }
+
+            // For non-whole-table deletes, we require an indexable structural target.
+            let index = null;
+            if (typeof this.quill.getIndex === 'function') {
+                try {
+                    index = this.quill.getIndex(targetBlot);
+                } catch (error) {
+                    index = null;
+                }
+            }
+            if (index === null && typeof targetBlot.offset === 'function') {
+                index = targetBlot.offset(this.quill.scroll);
+            }
+            const length = typeof targetBlot.length === 'function' ? targetBlot.length() : null;
             if (typeof index !== 'number' || typeof length !== 'number' || length <= 0) {
                 return false;
             }
-            this.quill.deleteText(index, length, this.QuillRef.sources.SILENT);
-            return true;
+
+            // Only delete the whole table if this delete change actually spans the entire table.
+            // Otherwise, accepting a delete inside a table should only remove the tracked range.
+            const changeStart = range.index;
+            const changeEnd = range.index + range.length;
+            const tableStart = index;
+            const tableEnd = index + length;
+
+            // Primary guard: only delete the whole table if the tracked range spans it.
+            if (changeStart <= tableStart && changeEnd >= tableEnd) {
+                this.quill.deleteText(index, length, this.QuillRef.sources.SILENT);
+                return true;
+            }
+            return false;
         }
 
         _resetFormatting(range) {
@@ -839,6 +1094,28 @@
                 }
             });
             if (styleVars) {
+                // Persist style vars as data attributes so server-side HTML sanitization
+                // (which strips style="") does not wipe per-user colors.
+                // These data-q2-* attributes are allow-listed.
+                try {
+                    const bg = styleVars['--q2-insert-bg'];
+                    const border = styleVars['--q2-insert-border'];
+                    const shadow = styleVars['--q2-insert-shadow'];
+                    if (this.styleVarAttrNames?.bg) {
+                        if (bg) node.setAttribute(this.styleVarAttrNames.bg, bg);
+                        else node.removeAttribute(this.styleVarAttrNames.bg);
+                    }
+                    if (this.styleVarAttrNames?.border) {
+                        if (border) node.setAttribute(this.styleVarAttrNames.border, border);
+                        else node.removeAttribute(this.styleVarAttrNames.border);
+                    }
+                    if (this.styleVarAttrNames?.shadow) {
+                        if (shadow) node.setAttribute(this.styleVarAttrNames.shadow, shadow);
+                        else node.removeAttribute(this.styleVarAttrNames.shadow);
+                    }
+                } catch (error) {
+                    // best-effort
+                }
                 this._applyStyleVars(node, styleVars);
             }
         }
@@ -854,6 +1131,23 @@
                     value[attrName] = attrValue;
                 }
             });
+
+            // Re-hydrate persisted palette vars (if present) back into the blot formats.
+            // This makes the palette survive HTML snapshots and round-trip through Quill.
+            try {
+                const bg = this.styleVarAttrNames?.bg ? node.getAttribute(this.styleVarAttrNames.bg) : null;
+                const border = this.styleVarAttrNames?.border ? node.getAttribute(this.styleVarAttrNames.border) : null;
+                const shadow = this.styleVarAttrNames?.shadow ? node.getAttribute(this.styleVarAttrNames.shadow) : null;
+                if (bg || border || shadow) {
+                    value[STYLE_VARS_KEY] = {
+                        '--q2-insert-bg': bg || '',
+                        '--q2-insert-border': border || '',
+                        '--q2-insert-shadow': shadow || '',
+                    };
+                }
+            } catch (error) {
+                // ignore
+            }
             return value;
         }
 
@@ -864,6 +1158,13 @@
             Object.values(this.attrNames).forEach((attrName) => {
                 node.removeAttribute(attrName);
             });
+            if (this.styleVarAttrNames) {
+                Object.values(this.styleVarAttrNames).forEach((attrName) => {
+                    if (attrName) {
+                        node.removeAttribute(attrName);
+                    }
+                });
+            }
             if (node.style && this._styleVarNames?.length) {
                 this._styleVarNames.forEach((varName) => {
                     node.style.removeProperty(varName);

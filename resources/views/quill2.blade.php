@@ -562,7 +562,8 @@
     <script>
         const MAX_QUILL_INIT_ATTEMPTS = 80;
         const TABLE_BETTER_READY_EVENT = 'quill-table-better:ready';
-        const TABLE_BETTER_WAIT_MS = 5000;
+        const BASE_TABLE_BETTER_WAIT_MS = 5000;
+        const TABLE_DOC_EXTRA_WAIT_MS = 15000;
         const initQuillLite = (attempt = 0) => {
             if (!window.Quill) {
                 console.error('Quill is not available. Did you load the assets?');
@@ -577,6 +578,42 @@
                 }
                 return;
             }
+
+            const initialContent = @json($initialContent ?? '');
+            const initialDelta = @json($initialDelta ?? ['ops' => []]);
+            if (typeof window !== 'undefined') {
+                window.quill2Debug = window.quill2Debug || {};
+                window.quill2Debug.initialDelta = initialDelta;
+            }
+            const initialChanges = @json($initialChanges ?? []);
+            const initialComments = @json($initialComments ?? []);
+            const initialHtml = @json($initialHtml ?? null);
+            if (typeof window !== 'undefined') {
+                window.quill2Debug = window.quill2Debug || {};
+                window.quill2Debug.initialHtml = initialHtml;
+            }
+
+            // If this document contains tables, do not initialize without the table module;
+            // otherwise tables won't hydrate back after reload.
+            const deltaAppearsToContainTable = (delta) => {
+                const ops = Array.isArray(delta?.ops) ? delta.ops : [];
+                return ops.some((op) => {
+                    if (!op || typeof op !== 'object') {
+                        return false;
+                    }
+                    if (op.attributes && typeof op.attributes === 'object') {
+                        const keys = Object.keys(op.attributes);
+                        return keys.some((k) => /^table/i.test(k) || /^row/i.test(k) || /^cell/i.test(k));
+                    }
+                    const inserted = op.insert;
+                    if (inserted && typeof inserted === 'object') {
+                        return Object.keys(inserted).some((k) => /^table/i.test(k));
+                    }
+                    return false;
+                });
+            };
+            const htmlAppearsToContainTable = (html) => typeof html === 'string' && /<table[\s>]/i.test(html);
+            const documentNeedsBetterTable = htmlAppearsToContainTable(initialHtml) || deltaAppearsToContainTable(initialDelta);
 
             const betterTableReady = Boolean(window.__quillTableBetterReady && window.QuillBetterTable);
             const skipBetterTableWait = Boolean(window.__quillTableBetterSkipWait);
@@ -598,9 +635,13 @@
                         window.__quillTableBetterAwaitingInit = false;
                         window.__quillTableBetterSkipWait = true;
                         window.__quillTableBetterWaitTimer = null;
-                        console.warn('quill-table-better took too long to load. Continuing without table tools.');
+                        if (documentNeedsBetterTable) {
+                            console.warn('quill-table-better took too long to load. Tables may not render until it is available.');
+                        } else {
+                            console.warn('quill-table-better took too long to load. Continuing without table tools.');
+                        }
                         initQuillLite();
-                    }, TABLE_BETTER_WAIT_MS);
+                    }, BASE_TABLE_BETTER_WAIT_MS + (documentNeedsBetterTable ? TABLE_DOC_EXTRA_WAIT_MS : 0));
                 }
                 return;
             }
@@ -612,19 +653,6 @@
                 window.__quillTableBetterAwaitingInit = false;
             }
 
-            const initialContent = @json($initialContent ?? '');
-            const initialDelta = @json($initialDelta ?? ['ops' => []]);
-            if (typeof window !== 'undefined') {
-                window.quill2Debug = window.quill2Debug || {};
-                window.quill2Debug.initialDelta = initialDelta;
-            }
-            const initialChanges = @json($initialChanges ?? []);
-            const initialComments = @json($initialComments ?? []);
-            const initialHtml = @json($initialHtml ?? null);
-                        if (typeof window !== 'undefined') {
-                            window.quill2Debug = window.quill2Debug || {};
-                            window.quill2Debug.initialHtml = initialHtml;
-                        }
             const saveEndpoint = @json(route('quill2.save'));
             const deleteEndpoint = @json(route('quill2.destroy'));
             const imageUploadEndpoint = @json(route('images.upload'));
@@ -889,6 +917,40 @@
                     });
                     return delta;
                 });
+
+                // Preserve tracked-change spans when hydrating via dangerouslyPasteHTML.
+                // Without this, HTML hydration can lose the custom q2-change blot formatting.
+                quill.clipboard.addMatcher('SPAN', (node, delta) => {
+                    const changeId = node?.getAttribute?.('data-q2-change-id') || null;
+                    const hasMarker = Boolean(changeId) || Boolean(node?.classList?.contains?.('q2-change-inline'));
+                    if (!hasMarker || !changeId) {
+                        return delta;
+                    }
+
+                    const changeType = node.getAttribute('data-q2-change-type') || '';
+                    const changeStatus = node.getAttribute('data-q2-change-status') || '';
+                    const userId = node.getAttribute('data-q2-user-id') || '';
+                    const userName = node.getAttribute('data-q2-user-name') || '';
+                    const userEmail = node.getAttribute('data-q2-user-email') || '';
+                    const timestamp = node.getAttribute('data-q2-timestamp') || '';
+
+                    (delta.ops || []).forEach((op) => {
+                        if (!op || !Object.prototype.hasOwnProperty.call(op, 'insert')) {
+                            return;
+                        }
+                        op.attributes = op.attributes || {};
+                        op.attributes['q2-change'] = {
+                            'data-q2-change-id': String(changeId),
+                            'data-q2-change-type': String(changeType),
+                            'data-q2-change-status': String(changeStatus),
+                            'data-q2-user-id': String(userId),
+                            'data-q2-user-name': String(userName),
+                            'data-q2-user-email': String(userEmail),
+                            'data-q2-timestamp': String(timestamp),
+                        };
+                    });
+                    return delta;
+                });
             } catch (error) {
                 console.warn('Unable to register IMG clipboard matcher', error);
             }
@@ -902,13 +964,49 @@
                         quill.format('align', value, userSource);
                         return;
                     }
-                    const [leaf] = quill.getLeaf(range.index);
-                    const domNode = leaf && leaf.domNode ? leaf.domNode : null;
-                    if (domNode && domNode.tagName === 'IMG') {
-                        const blot = window.Quill.find(domNode);
+                    const resolveImageDomNodeAt = (index) => {
+                        if (typeof index !== 'number' || index < 0) {
+                            return null;
+                        }
+                        const [leaf] = quill.getLeaf(index);
+                        const leafNode = leaf && leaf.domNode ? leaf.domNode : null;
+                        if (!leafNode) {
+                            return null;
+                        }
+                        if (leafNode.tagName === 'IMG') {
+                            return leafNode;
+                        }
+                        if (leafNode.querySelector) {
+                            const img = leafNode.querySelector('img');
+                            if (img) {
+                                return img;
+                            }
+                        }
+                        const parent = leafNode.parentElement || null;
+                        if (parent?.tagName === 'IMG') {
+                            return parent;
+                        }
+                        if (parent?.querySelector) {
+                            const img = parent.querySelector('img');
+                            if (img) {
+                                return img;
+                            }
+                        }
+                        return null;
+                    };
+
+                    const imgNode = resolveImageDomNodeAt(range.index)
+                        || resolveImageDomNodeAt(Math.max(0, range.index - 1))
+                        || resolveImageDomNodeAt(range.index + 1);
+
+                    if (imgNode) {
+                        const blot = window.Quill.find(imgNode);
                         const index = typeof blot !== 'undefined' ? quill.getIndex(blot) : range.index;
                         quill.formatText(index, 1, { 'q2-img-align': value || null }, silentSource);
                         quill.setSelection(index, 1, silentSource);
+                        // Formatting with SILENT source may not emit a text-change event,
+                        // so re-run pill/table/list decorations immediately.
+                        scheduleDecorations();
                         return;
                     }
                     quill.format('align', value, userSource);
@@ -1380,16 +1478,6 @@
                     activeImageEl = img;
                     activeImageEl.classList.add('q2-image-selected');
                     positionHandleForImage(activeImageEl);
-
-                    try {
-                        const blot = window.Quill.find(activeImageEl);
-                        const index = typeof blot !== 'undefined' ? quill.getIndex(blot) : null;
-                        if (typeof index === 'number' && Number.isFinite(index)) {
-                            quill.setSelection(index, 1, silentSource);
-                        }
-                    } catch (error) {
-                        // best-effort
-                    }
                 };
 
                 const persistImageDimensions = (img, widthPx, heightPx) => {
@@ -1429,6 +1517,63 @@
                     const img = e.target && e.target.tagName === 'IMG' ? e.target : null;
                     if (img) {
                         selectImage(img);
+
+                        // Move Quill selection onto the image embed so arrow keys
+                        // and tracked-change actions behave as expected.
+                        try {
+                            const blot = window.Quill.find(img);
+                            const index = typeof blot !== 'undefined' ? quill.getIndex(blot) : null;
+                            if (typeof index === 'number' && Number.isFinite(index)) {
+                                quill.setSelection(index, 1, silentSource);
+                            }
+                        } catch (error) {
+                            // best-effort
+                        }
+                    }
+                });
+
+                // When an image embed is selected, typing should not replace the image.
+                // Instead, insert after the embed (or between consecutive embeds).
+                quill.root.addEventListener('keydown', (e) => {
+                    if (!e || e.defaultPrevented) {
+                        return;
+                    }
+                    // Ignore shortcuts / composition.
+                    if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing) {
+                        return;
+                    }
+
+                    const range = quill.getSelection();
+                    if (!range || range.length !== 1) {
+                        return;
+                    }
+                    const [leaf] = quill.getLeaf(range.index);
+                    const domNode = leaf && leaf.domNode ? leaf.domNode : null;
+                    if (!domNode || domNode.tagName !== 'IMG') {
+                        return;
+                    }
+
+                    // Allow deleting the image when it is selected.
+                    if (e.key === 'Backspace' || e.key === 'Delete') {
+                        return;
+                    }
+
+                    const blot = window.Quill.find(domNode);
+                    const index = typeof blot !== 'undefined' ? quill.getIndex(blot) : range.index;
+                    const insertAt = Math.max(0, Number(index) + 1);
+
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        quill.insertText(insertAt, '\n', userSource);
+                        quill.setSelection(insertAt + 1, 0, silentSource);
+                        return;
+                    }
+
+                    // Printable character -> insert after embed.
+                    if (typeof e.key === 'string' && e.key.length === 1) {
+                        e.preventDefault();
+                        quill.insertText(insertAt, e.key, userSource);
+                        quill.setSelection(insertAt + 1, 0, silentSource);
                     }
                 });
 
@@ -1730,13 +1875,39 @@
                         },
                     ],
                 };
+            // Prefer HTML hydration when we have a stored snapshot.
+            // This avoids subtle Delta-vs-DOM drift (e.g. blank paragraphs that exist in the editor DOM
+            // but do not survive a round-trip through delta serialization).
+            // Our clipboard matchers preserve tracked-change metadata (q2-change) when pasting HTML.
             if (initialHtml) {
                 const hydratedHtml = sanitizeHydratedHtml(initialHtml);
                 quill.clipboard.dangerouslyPasteHTML(0, hydratedHtml, 'silent');
-            } else if (hasStoredDelta) {
-                quill.setContents(resolvedDelta, silentSource);
             } else {
                 quill.setContents(resolvedDelta, silentSource);
+            }
+
+            // IMPORTANT: Prevent the initial hydration from becoming the first undo step.
+            // Otherwise, pressing undo right after a refresh can revert the entire document
+            // back to an empty editor.
+            try {
+                if (quill?.history) {
+                    if (typeof quill.history.clear === 'function') {
+                        quill.history.clear();
+                    }
+                    if (typeof quill.history.cutoff === 'function') {
+                        quill.history.cutoff();
+                    }
+                    if (quill.history.stack && typeof quill.history.stack === 'object') {
+                        if (Array.isArray(quill.history.stack.undo)) {
+                            quill.history.stack.undo.length = 0;
+                        }
+                        if (Array.isArray(quill.history.stack.redo)) {
+                            quill.history.stack.redo.length = 0;
+                        }
+                    }
+                }
+            } catch (error) {
+                // best-effort
             }
 
             const setStatus = (message, tone = 'muted') => {
@@ -1923,11 +2094,29 @@
                 if (!selection) {
                     return null;
                 }
+
+                const metaFromDom = (node) => {
+                    if (!node || !(node instanceof Element)) {
+                        return null;
+                    }
+                    const metaNode = node.closest?.(`[${tracker.attrNames.id}]`) || node;
+                    const changeId = metaNode?.getAttribute?.(tracker.attrNames.id) || null;
+                    if (!changeId) {
+                        return null;
+                    }
+                    return {
+                        [tracker.attrNames.id]: changeId,
+                        [tracker.attrNames.type]: metaNode.getAttribute?.(tracker.attrNames.type) || 'insert',
+                        [tracker.attrNames.status]: metaNode.getAttribute?.(tracker.attrNames.status) || 'pending',
+                    };
+                };
+
                 const probes = [];
                 if (selection.length && selection.length > 0) {
                     probes.push({ index: selection.index, length: selection.length });
                 } else {
                     probes.push({ index: selection.index, length: 0 });
+                    probes.push({ index: selection.index, length: 1 });
                     if (selection.index > 0) {
                         probes.push({ index: selection.index - 1, length: 1 });
                     }
@@ -1937,6 +2126,18 @@
                     const format = quill.getFormat(Math.max(0, probe.index), probe.length);
                     const meta = format?.[changeFormatKey];
                     if (!meta) {
+                        // Fallback for embeds (IMG, etc): Quill formats aren't always reported
+                        // consistently for length=0 probes, so read from DOM when possible.
+                        try {
+                            const [leaf] = quill.getLeaf(Math.max(0, probe.index));
+                            const domNode = leaf?.domNode || null;
+                            const domMeta = metaFromDom(domNode) || metaFromDom(domNode?.parentElement);
+                            if (domMeta?.[tracker.attrNames.id]) {
+                                return domMeta;
+                            }
+                        } catch (error) {
+                            // ignore
+                        }
                         continue;
                     }
                     const changeId = meta?.[tracker.attrNames.id];
@@ -1969,10 +2170,18 @@
                     if (!changeId || changeMap.has(changeId)) {
                         return;
                     }
-                    const range = tracker.findChangeRange(changeId);
-                    const snippet = (range && range.length)
-                        ? quill.getText(range.index, range.length)
-                        : (node.textContent || '');
+                    const ranges = typeof tracker.findChangeRanges === 'function'
+                        ? tracker.findChangeRanges(changeId)
+                        : [];
+                    const range = ranges.length ? ranges[0] : tracker.findChangeRange(changeId);
+                    const totalLength = ranges.length
+                        ? ranges.reduce((sum, r) => sum + (Number(r?.length) || 0), 0)
+                        : (range?.length ?? 0);
+                    const snippet = ranges.length
+                        ? ranges.map((r) => quill.getText(r.index, r.length)).join('')
+                        : ((range && range.length)
+                            ? quill.getText(range.index, range.length)
+                            : (node.textContent || ''));
                     const createdAt = node.getAttribute(tracker.attrNames.timestamp) || new Date().toISOString();
                     const userEmailAttr = tracker.attrNames.userEmail
                         ? node.getAttribute(tracker.attrNames.userEmail)
@@ -1984,7 +2193,7 @@
                         preview: formatChangePreview(snippet),
                         createdAt,
                         updatedAt: createdAt,
-                        length: range?.length ?? snippet.length,
+                        length: totalLength || snippet.length,
                         user: {
                             id: node.getAttribute(tracker.attrNames.userId) || 'unknown-user',
                             name: node.getAttribute(tracker.attrNames.userName) || 'Unknown',
@@ -1993,6 +2202,20 @@
                     });
                 });
                 return Array.from(changeMap.values());
+            };
+
+            // After history undo/redo we want the tracker ledger to reflect what actually exists
+            // in the document, and we do NOT want the undo/redo delta to create new change entries
+            // (e.g. image delete -> undo being recorded as a fresh image insert change).
+            const syncLedgerToDomAfterHistory = () => {
+                if (!tracker) {
+                    return;
+                }
+                // Undo/redo can re-introduce or remove tracked-change spans (including embeds like images).
+                // Treat the DOM as the source of truth after a history operation so the ledger matches
+                // the visible document state and bulk accept/reject buttons behave correctly.
+                const domChanges = collectTrackedChangesFromDom();
+                tracker.loadChanges(domChanges);
             };
 
             const updateBulkChangeButtons = (pendingCountOverride = null) => {
@@ -2096,7 +2319,10 @@
                 if (!changeId) {
                     return false;
                 }
-                const range = tracker.findChangeRange(changeId);
+                const ranges = typeof tracker.findChangeRanges === 'function'
+                    ? tracker.findChangeRanges(changeId)
+                    : [];
+                const range = ranges.length ? ranges[0] : tracker.findChangeRange(changeId);
                 if (!range) {
                     return false;
                 }
@@ -2981,13 +3207,26 @@
                     return;
                 }
                 const nodes = quill.root.querySelectorAll('[data-q2-change-id]');
+                const existingImageMarkers = quill.root.querySelectorAll('[data-q2-image-change], .q2-image-change--insert, .q2-image-change--delete, [data-q2-image-delete-badge]');
+                existingImageMarkers.forEach((node) => {
+                    node.removeAttribute('data-q2-image-change');
+                    node.removeAttribute('data-q2-image-change-by');
+                    node.removeAttribute('data-q2-image-delete-badge');
+                    node.classList?.remove?.('q2-image-change--insert', 'q2-image-change--delete');
+                    if (node.style) {
+                        node.style.removeProperty('display');
+                        node.style.removeProperty('width');
+                        node.style.removeProperty('max-width');
+                        node.style.removeProperty('margin-left');
+                        node.style.removeProperty('margin-right');
+                    }
+                });
                 if (!nodes.length) {
                     return;
                 }
                 const changes = tracker.getChanges({ sort: 'asc' });
                 const changeMap = new Map(changes.map((change) => [change.id, change]));
                 nodes.forEach((node) => {
-                    node.removeAttribute('data-q2-image-delete-badge');
                     const changeId = node.getAttribute('data-q2-change-id');
                     const metadata = changeMap.get(changeId);
                     const tooltip = describeChangeTooltip(metadata);
@@ -2997,16 +3236,16 @@
                         node.removeAttribute('title');
                     }
 
-                    if (!metadata || metadata.type !== 'delete') {
+                    if (!metadata) {
                         return;
                     }
-                    const badgeTime = metadata.createdAt ? formatActivityTime(metadata.createdAt) : null;
-                    if (!badgeTime) {
-                        return;
+
+                    // Image pill (inserted/deleted) similar to table pills.
+                    // Prefer applying this to a non-IMG wrapper so ::after renders reliably.
+                    let wrapper = node;
+                    if (wrapper.tagName === 'IMG') {
+                        wrapper = wrapper.parentElement || wrapper;
                     }
-                    const wrapper = node.tagName === 'IMG'
-                        ? node.closest('[data-q2-change-id]')
-                        : node;
                     if (!wrapper) {
                         return;
                     }
@@ -3014,7 +3253,42 @@
                     if (!hasImage) {
                         return;
                     }
-                    wrapper.setAttribute('data-q2-image-delete-badge', `Deleted @ ${badgeTime}`);
+                    if (wrapper.tagName === 'IMG') {
+                        // Avoid pseudo-elements on replaced elements.
+                        wrapper = wrapper.parentElement || wrapper;
+                    }
+                    if (!wrapper || wrapper.tagName === 'IMG') {
+                        return;
+                    }
+
+                    const normalizedType = metadata.type === 'delete' ? 'delete' : 'insert';
+                    wrapper.setAttribute('data-q2-image-change', normalizedType);
+                    wrapper.classList.add(`q2-image-change--${normalizedType}`);
+                    if (metadata?.user?.name || metadata?.user?.email) {
+                        const actor = metadata.user.name || metadata.user.email;
+                        wrapper.setAttribute('data-q2-image-change-by', actor);
+                    }
+
+                    // Keep the pill "stuck" to the image by sizing the wrapper to the image
+                    // instead of stretching full-width.
+                    const img = wrapper.querySelector?.('img') || null;
+                    if (wrapper.style) {
+                        wrapper.style.display = 'block';
+                        wrapper.style.width = 'fit-content';
+                        wrapper.style.maxWidth = '100%';
+
+                        const align = img?.getAttribute?.('data-q2-img-align') || null;
+                        if (String(align) === 'center') {
+                            wrapper.style.marginLeft = 'auto';
+                            wrapper.style.marginRight = 'auto';
+                        } else if (String(align) === 'right') {
+                            wrapper.style.marginLeft = 'auto';
+                            wrapper.style.marginRight = '0';
+                        } else {
+                            wrapper.style.marginLeft = '0';
+                            wrapper.style.marginRight = 'auto';
+                        }
+                    }
                 });
             };
 
@@ -3067,10 +3341,34 @@
                     tracker.loadChanges(domHydrated);
                     return;
                 }
-                const domIds = new Set(domHydrated.map((change) => change.id));
-                const orphanPending = existing.filter((change) => change.status === 'pending' && !domIds.has(change.id));
-                if (orphanPending.length && domHydrated.length >= existing.length / 2) {
-                    tracker.loadChanges(domHydrated);
+
+                // IMPORTANT: DOM hydration is best-effort and may not contain resolved metadata.
+                // Never overwrite existing ledger entries (especially accepted/rejected changes)
+                // based on DOM-derived heuristics.
+                const existingMap = new Map(existing.map((change) => [change.id, change]));
+                let didAdd = false;
+
+                domHydrated.forEach((domChange) => {
+                    if (!domChange?.id) {
+                        return;
+                    }
+                    if (!existingMap.has(domChange.id)) {
+                        existingMap.set(domChange.id, domChange);
+                        didAdd = true;
+                        return;
+                    }
+
+                    const current = existingMap.get(domChange.id);
+                    // For pending changes only, we can refresh preview/length from DOM.
+                    if (current?.status === 'pending' && domChange.status === 'pending') {
+                        current.preview = domChange.preview ?? current.preview;
+                        current.length = Number.isFinite(domChange.length) ? domChange.length : current.length;
+                        current.updatedAt = domChange.updatedAt ?? current.updatedAt;
+                    }
+                });
+
+                if (didAdd) {
+                    tracker.loadChanges(Array.from(existingMap.values()));
                 }
             };
 
@@ -3117,10 +3415,109 @@
             quill.on('selection-change', handleSelectionChange);
             handleSelectionChange();
 
-            quill.on('text-change', () => {
+            const rebaseCommentRanges = (delta, source) => {
+                if (!delta || source === silentSource) {
+                    return false;
+                }
+                if (!Array.isArray(commentLog) || !commentLog.length) {
+                    return false;
+                }
+                const DeltaCtor = window.Quill?.import ? window.Quill.import('delta') : null;
+                if (!DeltaCtor) {
+                    return false;
+                }
+                let deltaObj = null;
+                try {
+                    deltaObj = delta instanceof DeltaCtor ? delta : new DeltaCtor(delta);
+                } catch (error) {
+                    try {
+                        deltaObj = new DeltaCtor(delta?.ops ? { ops: delta.ops } : delta);
+                    } catch (innerError) {
+                        deltaObj = null;
+                    }
+                }
+                if (!deltaObj || typeof deltaObj.transformPosition !== 'function') {
+                    return false;
+                }
+
+                let changed = false;
+                commentLog.forEach((comment) => {
+                    if (!comment || comment.disconnected) {
+                        return;
+                    }
+                    const start = Number(comment?.range?.index);
+                    const length = Number(comment?.range?.length);
+                    if (!Number.isFinite(start) || !Number.isFinite(length) || length <= 0) {
+                        return;
+                    }
+                    const end = start + length;
+                    const nextStart = deltaObj.transformPosition(start, false);
+                    const nextEnd = deltaObj.transformPosition(end, true);
+                    const normalizedStart = Math.max(0, Number(nextStart) || 0);
+                    const normalizedEnd = Math.max(normalizedStart, Number(nextEnd) || normalizedStart);
+                    const nextLength = Math.max(0, normalizedEnd - normalizedStart);
+                    if (normalizedStart !== start || nextLength !== length) {
+                        comment.range.index = normalizedStart;
+                        comment.range.length = nextLength;
+                        changed = true;
+                    }
+                });
+                return changed;
+            };
+
+            quill.on('text-change', (delta, oldDelta, source) => {
+                rebaseCommentRanges(delta, source);
                 disconnectAbandonedComments();
                 scheduleDecorations();
             });
+
+            // Intercept undo/redo so history reverts do not get re-recorded as fresh tracked changes.
+            // This is especially important for embeds (images): deleting an image then undoing would
+            // otherwise be seen by the tracker as a brand-new "insert" change.
+            quill.root?.addEventListener('keydown', (event) => {
+                if (!event || event.defaultPrevented) {
+                    return;
+                }
+                const isMod = Boolean(event.ctrlKey || event.metaKey);
+                if (!isMod || event.altKey) {
+                    return;
+                }
+                const key = String(event.key || '').toLowerCase();
+                const wantsUndo = key === 'z' && !event.shiftKey;
+                const wantsRedo = key === 'y' || (key === 'z' && event.shiftKey);
+                if (!wantsUndo && !wantsRedo) {
+                    return;
+                }
+                if (!quill?.history) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const wasTracking = Boolean(isTrackingEnabled);
+                if (wasTracking) {
+                    tracker.disableTracking();
+                }
+                try {
+                    if (wantsUndo) {
+                        quill.history.undo();
+                    } else {
+                        quill.history.redo();
+                    }
+                } finally {
+                    if (wasTracking) {
+                        tracker.enableTracking();
+                    }
+                }
+
+                window.setTimeout(() => {
+                    syncLedgerToDomAfterHistory();
+                    scheduleDecorations();
+                    updateChangeActionButtons();
+                    updateBulkChangeButtons();
+                }, 0);
+            }, { capture: true });
 
             downloadButton?.addEventListener('click', () => {
                 const payload = tracker.snapshot();
@@ -3210,6 +3607,36 @@
                     .join(' ');
             };
 
+            const isUnsafeUrl = (attrName, value) => {
+                const raw = String(value || '').trim();
+                if (!raw) {
+                    return false;
+                }
+                const lower = raw.toLowerCase();
+                if (lower.startsWith('//')) {
+                    return true;
+                }
+                const blocked = ['javascript:', 'vbscript:', 'file:', 'blob:', 'cid:', 'data:'];
+                if (blocked.some((prefix) => lower.startsWith(prefix))) {
+                    return true;
+                }
+                try {
+                    const url = new URL(raw, window.location.origin);
+                    const protocol = (url.protocol || '').toLowerCase();
+                    if (!protocol) {
+                        return false;
+                    }
+                    if (attrName === 'href') {
+                        return !['http:', 'https:', 'mailto:', 'tel:'].includes(protocol);
+                    }
+                    // src
+                    return !['http:', 'https:'].includes(protocol);
+                } catch (error) {
+                    // Treat unparseable URLs as unsafe.
+                    return true;
+                }
+            };
+
             const sanitizeHtmlFragment = (html) => {
                 if (!html || typeof html !== 'string') {
                     return '';
@@ -3266,12 +3693,19 @@
                         const tagAllowList = TAG_PASTE_ATTRS[tag];
                         if (tagAllowList) {
                             if (tagAllowList.has(attrName) || GLOBAL_PASTE_ATTRS.has(attrName)) {
+                                if ((attrName === 'href' || attrName === 'src') && isUnsafeUrl(attrName, attr.value)) {
+                                    node.removeAttribute(attr.name);
+                                }
                                 return;
                             }
                             node.removeAttribute(attr.name);
                             return;
                         }
                         if (!GLOBAL_PASTE_ATTRS.has(attrName)) {
+                            node.removeAttribute(attr.name);
+                            return;
+                        }
+                        if ((attrName === 'href' || attrName === 'src') && isUnsafeUrl(attrName, attr.value)) {
                             node.removeAttribute(attr.name);
                         }
                     });
@@ -3728,6 +4162,155 @@
                 }, { capture: true });
             };
 
+            const registerImageDropHandler = () => {
+                const looksLikeImageFile = (file) => {
+                    if (!file) {
+                        return false;
+                    }
+                    const type = String(file.type || '').toLowerCase();
+                    if (type.startsWith('image/')) {
+                        return true;
+                    }
+                    const name = String(file.name || '').toLowerCase();
+                    if (!type && name && /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(name)) {
+                        return true;
+                    }
+                    return false;
+                };
+
+                const getDropInsertIndex = (event) => {
+                    try {
+                        const x = event?.clientX;
+                        const y = event?.clientY;
+                        const docRef = quill?.root?.ownerDocument || document;
+                        const caretRangeFromPoint = docRef.caretRangeFromPoint
+                            ? docRef.caretRangeFromPoint.bind(docRef)
+                            : null;
+                        const caretPositionFromPoint = docRef.caretPositionFromPoint
+                            ? docRef.caretPositionFromPoint.bind(docRef)
+                            : null;
+
+                        let node = null;
+                        let offset = 0;
+                        if (typeof x === 'number' && typeof y === 'number' && caretRangeFromPoint) {
+                            const range = caretRangeFromPoint(x, y);
+                            node = range?.startContainer || null;
+                            offset = Number(range?.startOffset || 0);
+                        } else if (typeof x === 'number' && typeof y === 'number' && caretPositionFromPoint) {
+                            const pos = caretPositionFromPoint(x, y);
+                            node = pos?.offsetNode || null;
+                            offset = Number(pos?.offset || 0);
+                        }
+
+                        if (node && quill?.root?.contains(node)) {
+                            const blot = window.Quill?.find ? window.Quill.find(node, true) : null;
+                            if (blot && typeof quill.getIndex === 'function') {
+                                const baseIndex = quill.getIndex(blot);
+                                if (Number.isFinite(baseIndex)) {
+                                    const docLength = Math.max(0, quill.getLength() - 1);
+                                    return Math.max(0, Math.min(docLength, baseIndex + Math.max(0, offset)));
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        // ignore
+                    }
+
+                    const sel = quill.getSelection(true);
+                    if (sel && typeof sel.index === 'number') {
+                        return Math.max(0, sel.index);
+                    }
+                    return Math.max(0, quill.getLength() - 1);
+                };
+
+                const handleDrop = async (event) => {
+                    const dt = event?.dataTransfer;
+                    const files = dt?.files ? Array.from(dt.files) : [];
+                    const imageFiles = files.filter(looksLikeImageFile);
+                    if (!imageFiles.length) {
+                        return;
+                    }
+
+                    // Prevent Quill/browser from inserting blob:/data: images that get stripped on save.
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const insertAt = getDropInsertIndex(event);
+                    const opener = window.quill2Debug?.openImageModalWithFile;
+                    const uploader = window.quill2Debug?.uploadBlobAsImage;
+
+                    // Single image: keep existing crop/upload modal UX.
+                    if (imageFiles.length === 1) {
+                        if (typeof opener === 'function') {
+                            opener(imageFiles[0], insertAt);
+                        } else {
+                            setStatus('Image drop is unavailable. Use Insert Image instead.', 'error');
+                        }
+                        return;
+                    }
+
+                    // Multi-image drop: auto-upload (no per-image crop UI) and insert as HTML.
+                    if (typeof uploader !== 'function') {
+                        setStatus('Image drop is unavailable. Use Insert Image instead.', 'error');
+                        return;
+                    }
+                    setStatus(`Uploading ${imageFiles.length} dropped images...`, 'muted');
+                    const uploadedUrls = [];
+                    for (let i = 0; i < imageFiles.length; i += 1) {
+                        try {
+                            const url = await uploader(imageFiles[i]);
+                            if (url) {
+                                uploadedUrls.push(url);
+                            }
+                        } catch (error) {
+                            console.error('Dropped image upload failed', error);
+                        }
+                    }
+                    if (!uploadedUrls.length) {
+                        setStatus('Image upload failed. Please try again.', 'error');
+                        return;
+                    }
+
+                    try {
+                        quill.setSelection(Math.max(0, insertAt), 0, silentSource);
+                    } catch (error) {
+                        // ignore
+                    }
+
+                    const htmlWithImages = uploadedUrls
+                        .filter(Boolean)
+                        .map((url) => `<p><img src="${encodeContent(url)}" /></p>`)
+                        .join('');
+
+                    if (insertSafeHtmlFragment(htmlWithImages)) {
+                        setStatus('Inserted dropped images.', 'success');
+                    } else {
+                        setStatus('Drop failed. Please try again.', 'error');
+                    }
+                };
+
+                quill.root.addEventListener('dragover', (event) => {
+                    const dt = event?.dataTransfer;
+                    const files = dt?.files ? Array.from(dt.files) : [];
+                    if (!files.some(looksLikeImageFile)) {
+                        return;
+                    }
+                    event.preventDefault();
+                    try {
+                        dt.dropEffect = 'copy';
+                    } catch (error) {
+                        // ignore
+                    }
+                }, { capture: true });
+
+                quill.root.addEventListener('drop', (event) => {
+                    handleDrop(event).catch((error) => {
+                        console.error('Quill Lite drop handler error', error);
+                        setStatus('Drop failed. Please try again.', 'error');
+                    });
+                }, { capture: true });
+            };
+
             const pasteFromClipboard = async (preferPlainText = false) => {
                 const resolveManualPayload = async () => {
                     if (!pasteModal || !pasteCatcher) {
@@ -3941,6 +4524,7 @@
             setViewMode('redline');
             setTrackingEnabled(true);
             registerSanitizedPasteHandler();
+            registerImageDropHandler();
             registerSmartTypographyBindings();
             scheduleDecorations();
 
@@ -4080,6 +4664,11 @@
             font-size: 1rem;
             line-height: 1.7;
             color: #0f172a;
+            caret-color: #0f172a;
+            /* Work around browser composition quirks where the caret can render
+               behind highlighted backgrounds inside contenteditable. */
+            transform: translateZ(0);
+            backface-visibility: hidden;
         }
 
         #quill2-root #quill2-hidden-tracking .quill2-change {
@@ -4087,11 +4676,12 @@
         }
 
         #quill2-root #quill2-editor [data-q2-change-type="insert"] {
-            position: relative;
-            background-color: var(--q2-insert-bg, var(--q2-insert-bg-default));
-            box-shadow: inset 0 -0.35em 0 var(--q2-insert-shadow, var(--q2-insert-shadow-default));
-            border-bottom: 1px solid var(--q2-insert-border, var(--q2-insert-border-default));
-            border-radius: 0.15rem;
+            /* Caret-safe insert styling: use a bottom border (not text-decoration).
+               This avoids browser caret paint issues and does not override user-applied underline formatting. */
+            background: none;
+            border-bottom: 2px solid var(--q2-insert-border, var(--q2-insert-border-default));
+            color: var(--q2-insert-text, var(--q2-insert-border, var(--q2-insert-border-default)));
+            caret-color: #0f172a;
         }
 
         #quill2-root #quill2-editor img[data-q2-change-type="insert"],
@@ -4131,6 +4721,33 @@
             pointer-events: none;
         }
 
+        #quill2-root #quill2-editor [data-q2-image-change] {
+            position: relative;
+            display: inline-block;
+        }
+
+        #quill2-root #quill2-editor [data-q2-image-change]::after {
+            content: attr(data-q2-image-change) ' image';
+            position: absolute;
+            top: -0.85rem;
+            right: 0.5rem;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            padding: 0.15rem 0.55rem;
+            border-radius: 999px;
+            color: #0f172a;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid currentColor;
+            pointer-events: none;
+        }
+
+        #quill2-root #quill2-editor [data-q2-image-change="delete"]::after {
+            color: #9f1239;
+            border-color: #fda4af;
+        }
+
         #quill2-root #quill2-editor[data-view-mode="clean"] img[data-q2-change-type="insert"],
         #quill2-root #quill2-editor[data-view-mode="clean"] [data-q2-change-type="insert"] img,
         #quill2-root #quill2-editor[data-view-mode="clean"] img[data-q2-change-type="delete"],
@@ -4140,11 +4757,13 @@
         }
 
         #quill2-root #quill2-editor [data-q2-change-type="delete"] {
-            background-color: #fee2e2;
+            /* Caret-safe delete styling: strikethrough only (no filled background). */
+            background: none;
             color: #b91c1c;
             text-decoration: line-through;
             text-decoration-thickness: 2px;
             text-decoration-color: #991b1b;
+            caret-color: #0f172a;
         }
 
         #quill2-root #quill2-editor table[data-q2-table-change] {
@@ -4194,7 +4813,12 @@
             box-shadow: none;
             border-bottom: none;
             color: inherit;
+            isolation: auto;
+            z-index: auto;
+            text-decoration: none;
         }
+
+        /* (No ::before highlights anymore; underline/strikethrough is caret-safe.) */
 
         #quill2-root #quill2-editor[data-view-mode="clean"] table[data-q2-table-change] {
             position: static;
@@ -4208,6 +4832,11 @@
         }
 
         #quill2-root #quill2-editor[data-view-mode="clean"] table[data-q2-table-change]::after {
+            content: none;
+            display: none;
+        }
+
+        #quill2-root #quill2-editor[data-view-mode="clean"] [data-q2-image-change]::after {
             content: none;
             display: none;
         }

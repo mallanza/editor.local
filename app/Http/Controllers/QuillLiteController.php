@@ -3,11 +3,48 @@
 namespace App\Http\Controllers;
 
 use App\Models\QuillLiteDocument;
+use App\Support\QuillHtmlSanitizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class QuillLiteController extends Controller
 {
+    private function normalizeDelta($payload): ?array
+    {
+        if (! is_array($payload)) {
+            return $payload;
+        }
+
+        $ops = $payload['ops'] ?? null;
+        if (! is_array($ops)) {
+            return ['ops' => []];
+        }
+
+        $cleanOps = [];
+        foreach ($ops as $op) {
+            if (! is_array($op) || ! array_key_exists('insert', $op)) {
+                continue;
+            }
+
+            // quill-table-better can emit ops with insert: null. Quill expects string/embeds;
+            // treat null as a newline so table attributes remain attached to a valid insert.
+            if (($op['insert'] ?? null) === null) {
+                $op['insert'] = "\n";
+            }
+
+            $attributes = $op['attributes'] ?? null;
+            if (is_array($attributes) && count($attributes) === 0) {
+                unset($op['attributes']);
+            } elseif ($attributes !== null) {
+                $op['attributes'] = $attributes;
+            }
+
+            $cleanOps[] = $op;
+        }
+
+        return ['ops' => $cleanOps];
+    }
+
     /**
      * Display the simplified Quill demo that performs inline tracking.
      */
@@ -16,7 +53,9 @@ class QuillLiteController extends Controller
         $seed = trim($request->query('seed', "Sample document\n\nType here..."));
         $document = QuillLiteDocument::query()->first();
         $initialContent = $document?->text ?? $seed;
-        $initialDelta = $document?->delta;
+        // Normalize stored deltas (e.g. table modules may emit ops with insert: null).
+        // Quill expects inserts to be strings/embeds; null inserts will drop structure on reload.
+        $initialDelta = $this->normalizeDelta($document?->delta);
         if (! is_array($initialDelta) || empty($initialDelta['ops'])) {
             $seedText = $initialContent === '' ? $seed : $initialContent;
             $seedText .= str_ends_with($seedText, "\n") ? '' : "\n";
@@ -28,7 +67,7 @@ class QuillLiteController extends Controller
         }
         $initialChanges = $document?->changes ?? [];
         $initialComments = $document?->comments ?? [];
-        $initialHtml = $document?->html;
+        $initialHtml = QuillHtmlSanitizer::sanitize($document?->html);
 
         $viewer = $request->user();
         $quillUser = [
@@ -60,16 +99,19 @@ class QuillLiteController extends Controller
             'html' => 'nullable|string',
         ]);
 
+        $sanitizedDelta = $this->normalizeDelta($data['delta'] ?? null) ?? ['ops' => []];
+        $sanitizedHtml = QuillHtmlSanitizer::sanitize($data['html'] ?? null);
+
         $document = QuillLiteDocument::query()->first();
         if (! $document) {
             $document = new QuillLiteDocument();
         }
         $document->fill([
-            'delta' => $data['delta'] ?? ['ops' => []],
+            'delta' => $sanitizedDelta,
             'changes' => $data['changes'] ?? [],
             'comments' => $data['comments'] ?? [],
             'text' => $data['text'] ?? '',
-            'html' => $data['html'] ?? null,
+            'html' => $sanitizedHtml,
         ]);
         $document->save();
 
